@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Turno Dia - Sra. Ursula</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f0f4f8;color:#1a1a1a;font-size:15px}
+
+.header{background:#1F4E79;color:#fff;padding:12px 16px;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,0.3)}
+.header-top{display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:17px;font-weight:700;line-height:1.2}
+.header p{font-size:12px;opacity:0.75;margin-top:2px}
+.btn-gen-top{background:#e67e22;color:#fff;border:none;padding:9px 14px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;margin-left:10px}
+
+.wrap{padding:12px 12px 110px}
+
+.sec{margin-bottom:14px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.1)}
+.sec-title{background:#1F4E79;color:#fff;padding:9px 14px;font-size:13px;font-weight:700;letter-spacing:0.04em;display:flex;align-items:center;gap:8px}
+.sec-title span.ico{font-size:15px}
+.sec-body{padding:14px}
+
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.field-row.one{grid-template-columns:1fr}
+.field-row.three{grid-template-columns:1fr 1fr 1fr}
+.field{display:flex;flex-direction:column;gap:4px}
+label{font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.04em}
+
+input[type=text],input[type=date],input[type=time],input[type=number],select,textarea{
+  width:100%;font-size:14px;padding:9px 11px;border:1.5px solid #d0d8e4;border-radius:8px;
+  background:#fafbfc;color:#1a1a1a;font-family:Arial,sans-serif;-webkit-appearance:none;appearance:none
+}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#2E75B6;background:#fff}
+textarea{resize:vertical;min-height:60px;line-height:1.5}
+
+.sub{font-size:11px;font-weight:700;color:#2E75B6;margin:14px 0 7px;text-transform:uppercase;letter-spacing:0.05em;border-left:3px solid #2E75B6;padding-left:8px}
+
+/* Signos vitales bloque hora */
+.sv-block{background:#f0f4f8;border-radius:10px;padding:12px;margin-bottom:10px}
+.sv-block-title{font-size:12px;font-weight:700;color:#1F4E79;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.sv-block-title .hora-badge{background:#1F4E79;color:#fff;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:700}
+
+/* Medicacion table */
+.med-group{margin-bottom:12px;border-radius:10px;overflow:hidden;border:1.5px solid #e0e0e0}
+.med-group-title{padding:7px 12px;font-size:12px;font-weight:700;color:#fff;letter-spacing:0.03em}
+.med-row{display:flex;align-items:center;padding:8px 12px;border-top:1px solid #e8e8e8;gap:10px}
+.med-row:first-of-type{border-top:none}
+.med-name{flex:1;font-size:13px;font-weight:600;color:#1a1a1a}
+.med-dosis{font-size:12px;color:#555;min-width:90px}
+.check-box{width:32px;height:32px;border:2px solid #bbb;border-radius:7px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#fff;transition:all 0.15s;-webkit-tap-highlight-color:transparent;user-select:none}
+.check-box.checked{background:#27ae60;border-color:#27ae60}
+.check-box.checked::after{content:'✓';color:#fff;font-size:18px;font-weight:700;line-height:1}
+.med-extra-row{display:flex;align-items:center;padding:6px 12px;border-top:1px solid #e8e8e8;gap:10px;background:#fafafa}
+.med-extra-row input{flex:1;border:1px solid #ddd;border-radius:6px;padding:6px 8px;font-size:13px;background:#fff}
+.med-extra-row .check-box{width:28px;height:28px}
+
+/* Colores grupos med */
+.g-antes{background:#d4874a}
+.g-desayuno{background:#c0392b}
+.g-almuerzo{background:#5b82c0}
+.g-terapia{background:#c8b840}
+.g-cena{background:#2e7d32}
+.g-despues{background:#7b5ea7}
+.g-condicional{background:#c0392b}
+
+/* Meal table */
+.meal-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:8px}
+.meal-table th{background:#1F4E79;color:#fff;padding:7px 8px;text-align:left;font-weight:700;font-size:11px}
+.meal-table td{border:1px solid #e0e0e0;padding:5px 6px}
+.meal-table .meal-lbl{background:#D6E4F0;font-weight:700;color:#1F4E79;font-size:12px;white-space:nowrap}
+.meal-table td input{border:none;background:transparent;font-size:13px;padding:3px 4px;width:100%;font-family:Arial,sans-serif}
+.meal-table td input:focus{outline:1px solid #2E75B6;border-radius:3px}
+
+/* Paseos */
+.paseo-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;background:#f0f4f8;border-radius:8px;padding:8px 10px}
+.paseo-row label{font-size:12px;color:#555;font-weight:700;min-width:40px;text-transform:none;letter-spacing:0}
+.paseo-row input{flex:1;font-size:14px;padding:7px 10px;border:1.5px solid #d0d8e4;border-radius:7px;background:#fff;font-family:Arial,sans-serif}
+.paseo-row .del-btn{background:none;border:none;color:#e74c3c;font-size:20px;cursor:pointer;padding:0 4px;line-height:1;flex-shrink:0}
+.add-paseo-btn{background:none;border:1.5px dashed #2E75B6;color:#2E75B6;padding:7px 14px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;width:100%;margin-top:4px}
+
+/* Visitas table */
+.vis-table{width:100%;border-collapse:collapse;font-size:13px}
+.vis-table th{background:#1F4E79;color:#fff;padding:7px 8px;text-align:left;font-size:11px;font-weight:700}
+.vis-table td{border:1px solid #e0e0e0;padding:4px 5px}
+.vis-table td input{border:none;background:transparent;font-size:13px;padding:3px 4px;width:100%;font-family:Arial,sans-serif}
+
+/* Bottom bar */
+.btm-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #ddd;padding:10px 14px;display:flex;gap:8px;z-index:200;box-shadow:0 -2px 10px rgba(0,0,0,0.1)}
+.btn-pdf{flex:1;background:#e67e22;color:#fff;border:none;padding:13px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-clear{background:#fff;color:#c0392b;border:1.5px solid #c0392b;padding:13px 16px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer}
+.btn-pdf:active{opacity:0.85}
+
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#27ae60;color:#fff;padding:10px 22px;border-radius:25px;font-size:14px;font-weight:700;z-index:300;display:none;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.2)}
+.toast.err{background:#e74c3c}
+
+/* Estado general full width */
+.estado-select{margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>Turno Dia — Sra. Ursula</h1>
+      <p>Reporte de enfermeria</p>
+    </div>
+    <button class="btn-gen-top" onclick="generarPDF()">Generar reporte</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- DATOS DEL TURNO -->
+<div class="sec">
+  <div class="sec-title"><span class="ico">📋</span>DATOS DEL TURNO</div>
+  <div class="sec-body">
+    <div class="field-row one">
+      <div class="field"><label>Fecha</label><input type="date" id="fecha"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Tecnica 1</label><input type="text" id="tecnica1" placeholder="Nombre completo"></div>
+      <div class="field"><label>Tecnica 2</label><input type="text" id="tecnica2" placeholder="Nombre completo"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SIGNOS VITALES -->
+<div class="sec">
+  <div class="sec-title"><span class="ico">🩺</span>SIGNOS VITALES</div>
+  <div class="sec-body">
+    <div class="sv-block">
+      <div class="sv-block-title">Al inicio del turno <span class="hora-badge">08:00</span></div>
+      <div class="field-row">
+        <div class="field"><label>Temperatura (C)</label><input type="text" id="temp1" placeholder="36.5"></div>
+        <div class="field"><label>Frec. cardiaca (lpm)</label><input type="text" id="fc1" placeholder="78"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Presion arterial</label><input type="text" id="pa1" placeholder="120/80"></div>
+        <div class="field"><label>Saturacion O2 (%)</label><input type="text" id="sat1" placeholder="97"></div>
+      </div>
+    </div>
+    <div class="sv-block">
+      <div class="sv-block-title">Al final del turno <span class="hora-badge">19:00</span></div>
+      <div class="field-row">
+        <div class="field"><label>Temperatura (C)</label><input type="text" id="temp2" placeholder="36.5"></div>
+        <div class="field"><label>Frec. cardiaca (lpm)</label><input type="text" id="fc2" placeholder="78"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Presion arterial</label><input type="text" id="pa2" placeholder="120/80"></div>
+        <div class="field"><label>Saturacion O2 (%)</label><input type="text" id="sat2" placeholder="97"></div>
+      </div>
+    </div>
+    <div class="field-row one estado-select">
+      <div class="field"><label>Estado general</label>
+        <select id="estado">
+          <option value="">Seleccionar...</option>
+          <option>Tranquila y colaboradora</option>
+          <option>Tranquila con momentos de ansiedad</option>
+          <option>Ansiosa / inquieta</option>
+          <option>Llorosa</option>
+          <option>Agitada (leve)</option>
+          <option>Agitada (moderada)</option>
+          <option>Agitada (severa)</option>
+          <option>Agresiva</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row one">
+      <div class="field"><label>Observaciones</label><textarea id="sv_obs" placeholder="Cualquier observacion relevante sobre los signos vitales..."></textarea></div>
+    </div>
+  </div>
+</div>
+
+<!-- MEDICACION -->
+<div class="sec">
+  <div class="sec-title"><span class="ico">💊</span>MEDICACION ADMINISTRADA</div>
+  <div class="sec-body">
+
+    <!-- ANTES DEL DESAYUNO -->
+    <div class="med-group">
+      <div class="med-group-title g-antes">ANTES DEL DESAYUNO</div>
+      <div class="med-row">
+        <div class="med-name">Vit C</div>
+        <div class="med-dosis">1 tab</div>
+        <div class="check-box" onclick="toggleCheck(this)" data-med="Vit C" data-dosis="1 tab" data-momento="Antes desayuno"></div>
+      </div>
+      <div class="med-row">
+        <div class="med-name">Meteospasmyl 300mg</div>
+        <div class="med-dosis">1 cap</div>
+        <div class="check-box" onclick="toggleCheck(this)" data-med="Meteospasmyl 300mg" data-dosis="1 cap" data-momento="Antes desayuno"></div>
+      </div>
+      <div class="med-row">
+        <div class="med-name">Lenzetto spray</div>
+        <div class="med-dosis">2 puff despues del bano</div>
+        <div class="check-box" onclick="toggleCheck(this)" data-med="Lenzetto spray" data-dosis="2 puff despues del bano" data-momento="Antes desayuno"></div>
+      </div>
+    </div>
+
+    <!-- DESAYUNO -->
+    <div class="med-group">
+      <div class="med-group-title g-desayuno">DESAYUNO</div>
+      <div class="med-row">
+        <div class="med-name">Sertralina 50mg</div>
+        <div class="med-dosis">1/2 tab</div>
+        <div class="check-box" onclick="toggleCheck(this)" data-med="Sertralina 50mg" data-dosis="1/2 tab" data-momento="Desayuno"></div>
+      </div>
+      <div class="med-row">
+        <div class="med-name">Propanolol 40mg</div>
+        <div class="med-dosis">1/2 tab</div>
+        <div class="check-box" onclick="toggleCheck(this)" data-med="Propanolol 40mg" data-dosis="1/2 tab" data-momento="Desayuno"></div>
+      </div>
+      <div class="med-row">
+        <div class="med-name">Compl B6</div>
+        <div class="med-dosis">1 tab</div>
+        <div class="check-box" onclick="toggleCheck(this)" data-med="Compl B6" data-dosis="1 tab" data-momento="Desayuno"></div>
+      </div>
+    </div>
+
+    <!-- ALMUERZO -->
+    <div class="med-group">
+      <div class="med-group-title g-almuerzo">ALMUERZO</div>
+      <div class="med-row">
+        <div class="med-name">Propanolol 40mg</div>
+        <div class="med-dosis">1 tab</div>
+        <div class="check-box" onclick="toggleCheck(this)" data-med="Propanolol 40mg" data-dosis="1 tab" data-momento="Almuerzo"></div>
+      </div>
+      <div class="med-row">
+        <div class="med-name">Clonazepam 0.5mg</div>
+        <div class="med-dosis">1 tab</div>
+        <div class="check-box" onclick="toggleCheck(this)" data-med="Clonazepam 0.5mg" data-dosis="1 tab" data-momento="Almuerzo"></div>
+      </div>
+      <div class="med-row">
+        <div class="med-name">Compl B6</div>
+        <div class="med-dosis">1 tab</div>
+        <div class="check-box" onclick="toggleCheck(this)" data-med="Compl B6" data-dosis="1 tab" data-momento="Almuerzo"></div>
+      </div>
+    </div>
+
+    <!-- ESPUES DE TERAPIA -->
+    <div class="med-group">
+      <div class="med-group-title g-terapia">DESPUES DE TERAPIA</div>
+      <div class="med-row">
+        <div class="med-name">Supracalm 1gr</div>
+        <div class="med-dosis">1 tab (condicional)</div>
+        <div class="check-box" onclick="toggleCheck(this)" data-med="Supracalm 1gr" data-dosis="1 tab (condicional)" data-momento="Despues terapia"></div>
+      </div>
+    </div>
+
+    <!-- CENA -->
+    <div class="med-group">
+      <div class="med-group-title g-cena">CENA</div>
+      <div class="med-row">
+        <div class="med-name">Quetiapina 25mg</div>
+        <div class="med-dosis">1/2 tab</div>
+        <div class="check-box" onclick="toggleCheck(this)" data-med="Quetiapina 25mg" data-dosis="1/2 tab" data-momento="Cena"></div>
+      </div>
+      <div class="med-row">
+        <div class="med-name">Compl B6</div>
+        <div class="med-dosis">1 tab</div>
+        <div class="check-box" onclick="toggleCheck(this)" data-med="Compl B6" data-dosis="1 tab" data-momento="Cena"></div>
+      </div>
+      <div class="med-row">
+        <div class="med-name">Propanolol 40mg</div>
+        <div class="med-dosis">1/2 tab</div>
+        <div class="check-box" onclick="toggleCheck(this)" data-med="Propanolol 40mg" data-dosis="1/2 tab" data-momento="Cena"></div>
+      </div>
+      <div class="med-row">
+        <div class="med-name">Supracalm 1gr</div>
+        <div class="med-dosis">1 tab</div>
+        <div class="check-box" onclick="toggleCheck(this)" data-med="Supracalm 1gr" data-dosis="1 tab" data-momento="Cena"></div>
+      </div>
+      <div class="med-row">
+        <div class="med-name">Meteospasmyl 300mg</div>
+        <div class="med-dosis">1 cap</div>
+        <div class="check-box" onclick="toggleCheck(this)" data-med="Meteospasmyl 300mg" data-dosis="1 cap" data-momento="Cena"></div>
+      </div>
+    </div>
+
+    <!-- CONDICIONAL -->
+    <div class="med-group">
+      <div class="med-group-title g-condicional">CONDICIONAL</div>
+      <div class="med-row">
+        <div class="med-name">Orfenadrina 100mg</div>
+        <div class="med-dosis">1 tab</div>
+        <div class="check-box" onclick="toggleCheck(this)" data-med="Orfenadrina 100mg" data-dosis="1 tab" data-momento="Condicional"></div>
+      </div>
+    </div>
+
+    <!-- EXTRAS EN BLANCO -->
+    <div class="sub">Medicamentos adicionales</div>
+    <div class="med-group">
+      <div id="extra-meds">
+        <div class="med-extra-row"><input type="text" placeholder="Medicamento y dosis"><div class="check-box" onclick="toggleCheck(this)" data-med="" data-momento="Adicional"></div></div>
+        <div class="med-extra-row"><input type="text" placeholder="Medicamento y dosis"><div class="check-box" onclick="toggleCheck(this)" data-med="" data-momento="Adicional"></div></div>
+        <div class="med-extra-row"><input type="text" placeholder="Medicamento y dosis"><div class="check-box" onclick="toggleCheck(this)" data-med="" data-momento="Adicional"></div></div>
+      </div>
+    </div>
+
+    <div class="field-row one" style="margin-top:10px">
+      <div class="field"><label>Observaciones</label><textarea id="med_obs" placeholder="Ej: paciente rechazo el clonazepam, se reporto al medico..."></textarea></div>
+    </div>
+  </div>
+</div>
+
+<!-- NUTRICION -->
+<div class="sec">
+  <div class="sec-title"><span class="ico">🍽️</span>NUTRICION E HIDRATACION</div>
+  <div class="sec-body">
+    <table class="meal-table">
+      <thead><tr><th>Comida</th><th>Alimentos</th><th>% consumido</th><th>Observaciones</th></tr></thead>
+      <tbody>
+        <tr><td class="meal-lbl">Desayuno</td><td><input type="text" class="mal"></td><td><input type="text" class="mpc" placeholder="75%"></td><td><input type="text" class="mob"></td></tr>
+        <tr><td class="meal-lbl">Almuerzo</td><td><input type="text" class="mal"></td><td><input type="text" class="mpc" placeholder="75%"></td><td><input type="text" class="mob"></td></tr>
+        <tr><td class="meal-lbl">Cena</td><td><input type="text" class="mal"></td><td><input type="text" class="mpc" placeholder="75%"></td><td><input type="text" class="mob"></td></tr>
+        <tr><td class="meal-lbl">Merienda</td><td><input type="text" class="mal"></td><td><input type="text" class="mpc" placeholder="—"></td><td><input type="text" class="mob"></td></tr>
+      </tbody>
+    </table>
+    <div class="field-row">
+      <div class="field"><label>Liquidos totales aprox.</label><input type="text" id="liquidos" placeholder="Ej: 800 ml"></div>
+      <div class="field"><label>Tipos de liquido</label><input type="text" id="tipo_liquido" placeholder="agua, infusion..."></div>
+    </div>
+    <div class="field-row one">
+      <div class="field"><label>Observaciones</label><textarea id="nutricion_obs"></textarea></div>
+    </div>
+  </div>
+</div>
+
+<!-- HIGIENE -->
+<div class="sec">
+  <div class="sec-title"><span class="ico">🚿</span>HIGIENE Y CUIDADO FISICO</div>
+  <div class="sec-body">
+    <div class="field-row">
+      <div class="field"><label>Bano realizado</label>
+        <select id="bano"><option value="">Seleccionar...</option><option>Si</option><option>No</option></select>
+      </div>
+      <div class="field"><label>Tipo</label>
+        <select id="bano_tipo"><option value="">Seleccionar...</option><option>Ducha</option><option>Esponja/cama</option></select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Hora del bano</label><input type="time" id="bano_hora"></div>
+      <div class="field"><label>Colaboracion</label>
+        <select id="bano_colab"><option value="">Seleccionar...</option><option>Si, colaboro</option><option>Parcialmente</option><option>No colaboro</option></select>
+      </div>
+    </div>
+    <div class="field-row one">
+      <div class="field"><label>Observaciones</label><textarea id="bano_obs" placeholder="Ej: se tranquilizo durante el bano, lloro al inicio..."></textarea></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Higiene bucal</label>
+        <select id="bucal"><option value="">Seleccionar...</option><option>Si</option><option>No</option></select>
+      </div>
+      <div class="field"><label>Hora</label><input type="time" id="bucal_hora"></div>
+    </div>
+
+    <div class="sub">Deposicion</div>
+    <div class="field-row">
+      <div class="field"><label>Realizo deposicion</label>
+        <select id="depo"><option value="">Seleccionar...</option><option>Si</option><option>No</option></select>
+      </div>
+      <div class="field"><label>Hora</label><input type="time" id="depo_hora"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Cantidad</label><input type="text" id="depo_cant" placeholder="Abundante / escasa"></div>
+      <div class="field"><label>Consistencia</label><input type="text" id="depo_cons" placeholder="Normal / blanda / dura"></div>
+    </div>
+    <div class="field-row one">
+      <div class="field"><label>Observaciones</label><textarea id="depo_obs"></textarea></div>
+    </div>
+
+    <div class="sub">Micciones</div>
+    <div class="field-row">
+      <div class="field"><label>N de cambios de panal</label><input type="number" id="mictions" min="0" placeholder="Ej: 4"></div>
+      <div class="field"><label>Presencia de orina</label>
+        <select id="orina"><option value="">Seleccionar...</option><option>Si, en todos</option><option>En algunos cambios</option><option>No se detecto</option></select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Caracteristicas</label><input type="text" id="orina_caract" placeholder="Color, olor normal..."></div>
+      <div class="field"><label>Hora ultimo cambio</label><input type="time" id="ultimo_cambio"></div>
+    </div>
+    <div class="field-row one">
+      <div class="field"><label>Observaciones micciones</label><textarea id="orina_obs"></textarea></div>
+    </div>
+  </div>
+</div>
+
+<!-- ESTADO DE ANIMO -->
+<div class="sec">
+  <div class="sec-title"><span class="ico">🧠</span>ESTADO DE ANIMO GENERAL</div>
+  <div class="sec-body">
+    <div class="field-row one estado-select">
+      <div class="field"><label>Estado de animo</label>
+        <select id="animo">
+          <option value="">Seleccionar...</option>
+          <option>Tranquila y colaboradora</option>
+          <option>Tranquila con momentos de ansiedad</option>
+          <option>Ansiosa / inquieta</option>
+          <option>Llorosa</option>
+          <option>Agitada (leve)</option>
+          <option>Agitada (moderada)</option>
+          <option>Agitada (severa)</option>
+          <option>Agresiva</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row one">
+      <div class="field"><label>Observaciones</label><textarea id="animo_obs" placeholder="Descripcion del estado de animo durante el turno, cambios de humor, momentos especificos..."></textarea></div>
+    </div>
+  </div>
+</div>
+
+<!-- ACTIVIDAD FISICA -->
+<div class="sec">
+  <div class="sec-title"><span class="ico">🚶</span>ACTIVIDAD FISICA</div>
+  <div class="sec-body">
+    <div class="sub">Paseos y caminatas</div>
+    <div id="paseos-container">
+      <div class="paseo-row">
+        <label>De</label><input type="time" class="paseo-desde">
+        <label>a</label><input type="time" class="paseo-hasta">
+        <input type="text" class="paseo-lugar" placeholder="Lugar (parque, casa...)">
+        <button class="del-btn" onclick="delPaseo(this)">×</button>
+      </div>
+    </div>
+    <button class="add-paseo-btn" onclick="addPaseo()">+ Agregar paseo / caminata</button>
+
+    <div class="field-row one" style="margin-top:12px">
+      <div class="field"><label>Calidad de la marcha</label>
+        <select id="marcha">
+          <option value="">Seleccionar...</option>
+          <option>Normal</option>
+          <option>Lenta</option>
+          <option>Inestable</option>
+          <option>Muy lenta / con apoyo</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row one">
+      <div class="field"><label>Observaciones</label><textarea id="activ_obs" placeholder="Cualquier observacion sobre la actividad fisica del dia..."></textarea></div>
+    </div>
+  </div>
+</div>
+
+<!-- VISITAS -->
+<div class="sec">
+  <div class="sec-title"><span class="ico">👥</span>VISITAS Y EVENTOS</div>
+  <div class="sec-body">
+    <table class="vis-table">
+      <thead><tr><th>Hora</th><th>Visitante</th><th>Duracion</th><th>Respuesta de Ursula</th></tr></thead>
+      <tbody id="vis-body">
+        <tr><td><input type="time"></td><td><input type="text"></td><td><input type="text" placeholder="1 hora"></td><td><input type="text"></td></tr>
+        <tr><td><input type="time"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+        <tr><td><input type="time"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- OBSERVACIONES GENERALES -->
+<div class="sec">
+  <div class="sec-title"><span class="ico">📝</span>OBSERVACIONES GENERALES</div>
+  <div class="sec-body">
+    <div class="field-row one">
+      <div class="field"><textarea id="obs_generales" placeholder="Escribe aqui cualquier observacion del turno..." style="min-height:120px"></textarea></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- fin wrap -->
+
+<!-- BARRA INFERIOR -->
+<div class="btm-bar">
+  <button class="btn-pdf" onclick="generarPDF()">📄 Generar reporte del turno</button>
+  <button class="btn-clear" onclick="limpiar()">🗑️</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function toggleCheck(el){
+  el.classList.toggle('checked');
+}
+
+function addPaseo(){
+  const c=document.getElementById('paseos-container');
+  const d=document.createElement('div');
+  d.className='paseo-row';
+  d.innerHTML='<label>De</label><input type="time" class="paseo-desde"><label>a</label><input type="time" class="paseo-hasta"><input type="text" class="paseo-lugar" placeholder="Lugar (parque, casa...)"><button class="del-btn" onclick="delPaseo(this)">×</button>';
+  c.appendChild(d);
+}
+
+function delPaseo(btn){
+  const rows=document.querySelectorAll('.paseo-row');
+  if(rows.length>1) btn.parentElement.remove();
+}
+
+function showToast(msg, isErr){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast'+(isErr?' err':'');
+  t.style.display='block';
+  setTimeout(()=>t.style.display='none',3000);
+}
+
+function v(id){ return document.getElementById(id)?.value?.trim()||'--'; }
+function vOpt(id){ return document.getElementById(id)?.value?.trim()||''; }
+
+function fDate(d){
+  if(!d) return '--';
+  const [y,m,da]=d.split('-');
+  return da+'/'+m+'/'+y;
+}
+function fDateFile(d){
+  if(!d) return 'sin-fecha';
+  const [y,m,da]=d.split('-');
+  return da+'-'+m+'-'+y;
+}
+
+function getMeds(){
+  const checks=document.querySelectorAll('.check-box');
+  const groups={};
+  checks.forEach(c=>{
+    const mom=c.dataset.momento||'Adicional';
+    const extraInput=c.parentElement.querySelector('input[type=text]');
+    const nombre=extraInput?extraInput.value.trim():(c.dataset.med||'');
+    const dosis=c.dataset.dosis||'';
+    if(!nombre) return;
+    if(!groups[mom]) groups[mom]=[];
+    groups[mom].push({nombre,dosis,checked:c.classList.contains('checked')});
+  });
+  return groups;
+}
+
+function getMeals(){
+  const nm=['Desayuno','Almuerzo','Cena','Merienda'];
+  const rows=document.querySelectorAll('.meal-table tbody tr');
+  let arr=[];
+  rows.forEach((r,i)=>{
+    const ins=r.querySelectorAll('input');
+    arr.push({comida:nm[i],alimentos:ins[0]?.value||'--',pct:ins[1]?.value||'--',obs:ins[2]?.value||''});
+  });
+  return arr;
+}
+
+function getPaseos(){
+  const rows=document.querySelectorAll('.paseo-row');
+  let arr=[];
+  rows.forEach(r=>{
+    const desde=r.querySelector('.paseo-desde')?.value;
+    const hasta=r.querySelector('.paseo-hasta')?.value;
+    const lugar=r.querySelector('.paseo-lugar')?.value?.trim();
+    if(desde||hasta||lugar) arr.push({desde:desde||'--',hasta:hasta||'--',lugar:lugar||'--'});
+  });
+  return arr;
+}
+
+function getVisitas(){
+  const rows=document.querySelectorAll('#vis-body tr');
+  let arr=[];
+  rows.forEach(r=>{
+    const ins=r.querySelectorAll('input');
+    const hora=ins[0]?.value;
+    const vis=ins[1]?.value?.trim();
+    if(hora||vis) arr.push({hora:hora||'--',visitante:vis||'--',dur:ins[2]?.value||'--',resp:ins[3]?.value||'--'});
+  });
+  return arr;
+}
+
+function generarPDF(){
+  const fechaVal=document.getElementById('fecha')?.value;
+  if(!fechaVal){showToast('Ingresa la fecha primero', true);return;}
+
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+
+  const W=210, mg=14, cw=W-mg*2;
+  let y=14;
+  const lineH=6;
+
+  // helpers
+  const hex2rgb=h=>{const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);return[r,g,b]};
+  function setFill(hex){const[r,g,b]=hex2rgb(hex);doc.setFillColor(r,g,b)}
+  function setTxt(hex){const[r,g,b]=hex2rgb(hex);doc.setTextColor(r,g,b)}
+  function setDraw(hex){const[r,g,b]=hex2rgb(hex);doc.setDrawColor(r,g,b)}
+
+  function checkY(need=20){
+    if(y+need>285){doc.addPage();y=14;}
+  }
+
+  function secHeader(title, icon=''){
+    checkY(14);
+    setFill('1F4E79');
+    doc.roundedRect(mg,y,cw,9,2,2,'F');
+    setTxt('FFFFFF');
+    doc.setFontSize(9);doc.setFont('helvetica','bold');
+    doc.text(icon+' '+title, mg+3, y+6);
+    y+=12;
+    setTxt('1a1a1a');
+  }
+
+  function fieldPair(l1,v1,l2,v2){
+    checkY(14);
+    const hw=(cw-4)/2;
+    // left
+    setFill('EBF3FB');doc.rect(mg,y,hw,10,'F');
+    setTxt('1F4E79');doc.setFontSize(7);doc.setFont('helvetica','bold');
+    doc.text(l1,mg+2,y+4);
+    setTxt('1a1a1a');doc.setFontSize(9);doc.setFont('helvetica','normal');
+    doc.text(v1||'--',mg+2,y+8.5,{maxWidth:hw-4});
+    // right
+    setFill('EBF3FB');doc.rect(mg+hw+4,y,hw,10,'F');
+    setTxt('1F4E79');doc.setFontSize(7);doc.setFont('helvetica','bold');
+    doc.text(l2,mg+hw+6,y+4);
+    setTxt('1a1a1a');doc.setFontSize(9);doc.setFont('helvetica','normal');
+    doc.text(v2||'--',mg+hw+6,y+8.5,{maxWidth:hw-4});
+    y+=13;
+  }
+
+  function fieldFull(label,val,tall=false){
+    if(!val||val==='--') val='—';
+    const lines=doc.splitTextToSize(val,cw-4);
+    const h=tall?Math.max(14,lines.length*5+7):14;
+    checkY(h+2);
+    setFill('EBF3FB');doc.rect(mg,y,cw,h,'F');
+    setTxt('1F4E79');doc.setFontSize(7);doc.setFont('helvetica','bold');
+    doc.text(label,mg+2,y+4);
+    setTxt('1a1a1a');doc.setFontSize(9);doc.setFont('helvetica','normal');
+    doc.text(lines,mg+2,y+8.5);
+    y+=h+3;
+  }
+
+  function svBlock(title, hora, t, fc, pa, sat){
+    checkY(36);
+    setFill('D6E4F0');doc.roundedRect(mg,y,cw,5,1,1,'F');
+    setTxt('1F4E79');doc.setFontSize(8);doc.setFont('helvetica','bold');
+    doc.text(title,mg+2,y+3.7);
+    setFill('1F4E79');doc.roundedRect(mg+cw-22,y+0.5,20,4,1,1,'F');
+    setTxt('FFFFFF');doc.setFontSize(7.5);doc.text(hora,mg+cw-12,y+3.7,{align:'center'});
+    y+=7;
+    fieldPair('Temperatura',t+'°C','Frec. cardiaca',fc+' lpm');
+    fieldPair('Presion arterial',pa,'Saturacion O2',sat+'%');
+  }
+
+  function subLabel(txt){
+    checkY(8);
+    setTxt('2E75B6');doc.setFontSize(8);doc.setFont('helvetica','bold');
+    doc.text(txt.toUpperCase(),mg,y+4);
+    setDraw('2E75B6');doc.line(mg+doc.getTextWidth(txt.toUpperCase())+2,y+2,mg+cw,y+2);
+    y+=7;
+    setTxt('1a1a1a');
+  }
+
+  // ─── HEADER PAGE ───
+  setFill('1F4E79');doc.rect(0,0,W,22,'F');
+  setTxt('FFFFFF');
+  doc.setFontSize(16);doc.setFont('helvetica','bold');
+  doc.text('TURNO DIA — SRA. URSULA',W/2,10,{align:'center'});
+  doc.setFontSize(9);doc.setFont('helvetica','normal');
+  doc.text('Reporte de Enfermeria',W/2,16,{align:'center'});
+  y=28;
+
+  // ─── DATOS DEL TURNO ───
+  secHeader('DATOS DEL TURNO','📋');
+  const fecha=fDate(fechaVal);
+  const t1=v('tecnica1'), t2=v('tecnica2');
+  fieldFull('Fecha',fecha);
+  fieldPair('Tecnica 1',t1,'Tecnica 2',t2);
+
+  // ─── SIGNOS VITALES ───
+  secHeader('SIGNOS VITALES','🩺');
+  svBlock('Al inicio del turno','08:00',v('temp1'),v('fc1'),v('pa1'),v('sat1'));
+  svBlock('Al final del turno','19:00',v('temp2'),v('fc2'),v('pa2'),v('sat2'));
+  fieldFull('Estado general',v('estado'));
+  if(vOpt('sv_obs')) fieldFull('Observaciones',v('sv_obs'),true);
+
+  // ─── MEDICACION ───
+  secHeader('MEDICACION ADMINISTRADA','💊');
+  const medGrupos=getMeds();
+  const grupoColors={
+    'Antes desayuno':'D4874A','Desayuno':'C0392B','Almuerzo':'5B82C0',
+    'Despues terapia':'C8B840','Cena':'2E7D32','Condicional':'8E44AD','Adicional':'555555'
+  };
+  const grupoNames={
+    'Antes desayuno':'ANTES DEL DESAYUNO','Desayuno':'DESAYUNO','Almuerzo':'ALMUERZO',
+    'Despues terapia':'DESPUES DE TERAPIA','Cena':'CENA','Condicional':'CONDICIONAL','Adicional':'ADICIONALES'
+  };
+  Object.entries(medGrupos).forEach(([mom,meds])=>{
+    if(!meds.length) return;
+    checkY(10+meds.length*7);
+    const hex=grupoColors[mom]||'555555';
+    const[r,g,b]=hex2rgb(hex);
+    doc.setFillColor(r,g,b);
+    doc.roundedRect(mg,y,cw,6,1,1,'F');
+    setTxt('FFFFFF');doc.setFontSize(8);doc.setFont('helvetica','bold');
+    doc.text(grupoNames[mom]||mom,mg+3,y+4.3);
+    y+=7;
+    meds.forEach(med=>{
+      checkY(7);
+      const ok=med.checked;
+      setFill(ok?'E8F5E9':'FFF9F9');
+      doc.rect(mg,y,cw,6,'F');
+      // checkbox visual
+      setDraw(ok?'27AE60':'BBBBBB');
+      doc.rect(mg+1,y+0.5,5,5);
+      if(ok){
+        setTxt('27AE60');doc.setFontSize(10);doc.setFont('helvetica','bold');
+        doc.text('✓',mg+1.5,y+4.8);
+      }
+      setTxt(ok?'1a5e20':'333333');doc.setFontSize(9);doc.setFont('helvetica','bold');
+      doc.text(med.nombre,mg+8,y+4.3);
+      setTxt('666666');doc.setFontSize(8);doc.setFont('helvetica','normal');
+      doc.text(med.dosis,mg+cw-doc.getTextWidth(med.dosis)-2,y+4.3);
+      y+=7;
+    });
+    y+=2;
+  });
+  if(vOpt('med_obs')) fieldFull('Observaciones',v('med_obs'),true);
+
+  // ─── NUTRICION ───
+  secHeader('NUTRICION E HIDRATACION','🍽️');
+  const meals=getMeals();
+  checkY(8+meals.length*8);
+  // tabla header
+  setFill('1F4E79');doc.rect(mg,y,cw,6,'F');
+  setTxt('FFFFFF');doc.setFontSize(7.5);doc.setFont('helvetica','bold');
+  const cols=[28,70,22,cw-120];
+  doc.text('Comida',mg+1,y+4.3);
+  doc.text('Alimentos',mg+cols[0]+1,y+4.3);
+  doc.text('% cons.',mg+cols[0]+cols[1]+1,y+4.3);
+  doc.text('Observaciones',mg+cols[0]+cols[1]+cols[2]+1,y+4.3);
+  y+=7;
+  const mealColors=['DESAYUNO','ALMUERZO','CENA','MERIENDA'];
+  const mealBg=['FFF3E0','E8F0FE','E8F5E9','F3E5F5'];
+  meals.forEach((m,i)=>{
+    checkY(8);
+    const[r,g,b]=hex2rgb(mealBg[i].replace('#',''));
+    doc.setFillColor(r,g,b);doc.rect(mg,y,cw,7,'F');
+    setFill('D6E4F0');doc.rect(mg,y,cols[0],7,'F');
+    setTxt('1F4E79');doc.setFontSize(7);doc.setFont('helvetica','bold');
+    doc.text(m.comida,mg+1,y+4.8);
+    setTxt('1a1a1a');doc.setFontSize(8.5);doc.setFont('helvetica','normal');
+    doc.text(m.alimentos||'--',mg+cols[0]+1,y+4.8,{maxWidth:cols[1]-2});
+    doc.text(m.pct||'--',mg+cols[0]+cols[1]+1,y+4.8);
+    doc.text(m.obs||'',mg+cols[0]+cols[1]+cols[2]+1,y+4.8,{maxWidth:cols[3]-2});
+    y+=8;
+  });
+  y+=2;
+  fieldPair('Liquidos totales',v('liquidos'),'Tipos de liquido',v('tipo_liquido'));
+  if(vOpt('nutricion_obs')) fieldFull('Observaciones',v('nutricion_obs'),true);
+
+  // ─── HIGIENE ───
+  secHeader('HIGIENE Y CUIDADO FISICO','🚿');
+  fieldPair('Bano realizado',v('bano'),'Tipo',v('bano_tipo'));
+  fieldPair('Hora del bano',v('bano_hora'),'Colaboracion',v('bano_colab'));
+  if(vOpt('bano_obs')) fieldFull('Observaciones',v('bano_obs'),true);
+  fieldPair('Higiene bucal',v('bucal'),'Hora',v('bucal_hora'));
+
+  subLabel('Deposicion');
+  fieldPair('Realizo deposicion',v('depo'),'Hora',v('depo_hora'));
+  fieldPair('Cantidad',v('depo_cant'),'Consistencia',v('depo_cons'));
+  if(vOpt('depo_obs')) fieldFull('Observaciones',v('depo_obs'),true);
+
+  subLabel('Micciones');
+  fieldPair('N de cambios de panal',v('mictions'),'Presencia de orina',v('orina'));
+  fieldPair('Caracteristicas',v('orina_caract'),'Ultimo cambio',v('ultimo_cambio'));
+  if(vOpt('orina_obs')) fieldFull('Observaciones',v('orina_obs'),true);
+
+  // ─── ESTADO DE ANIMO ───
+  secHeader('ESTADO DE ANIMO GENERAL','🧠');
+  fieldFull('Estado de animo',v('animo'));
+  if(vOpt('animo_obs')) fieldFull('Observaciones',v('animo_obs'),true);
+
+  // ─── ACTIVIDAD FISICA ───
+  secHeader('ACTIVIDAD FISICA','🚶');
+  subLabel('Paseos y caminatas');
+  const paseos=getPaseos();
+  if(paseos.length){
+    paseos.forEach(p=>{
+      checkY(8);
+      setFill('EBF3FB');doc.rect(mg,y,cw,7,'F');
+      setTxt('1a1a1a');doc.setFontSize(9);doc.setFont('helvetica','normal');
+      doc.text('De '+p.desde+' a '+p.hasta+'  —  '+p.lugar,mg+3,y+4.8);
+      y+=8;
+    });
+    y+=2;
+  } else {
+    fieldFull('Paseos','Sin paseos registrados');
+  }
+  fieldFull('Calidad de la marcha',v('marcha'));
+  if(vOpt('activ_obs')) fieldFull('Observaciones',v('activ_obs'),true);
+
+  // ─── VISITAS ───
+  const visitas=getVisitas();
+  if(visitas.length){
+    secHeader('VISITAS Y EVENTOS','👥');
+    checkY(8+visitas.length*8);
+    setFill('1F4E79');doc.rect(mg,y,cw,6,'F');
+    setTxt('FFFFFF');doc.setFontSize(7.5);doc.setFont('helvetica','bold');
+    doc.text('Hora',mg+1,y+4.3);
+    doc.text('Visitante',mg+21,y+4.3);
+    doc.text('Duracion',mg+80,y+4.3);
+    doc.text('Respuesta',mg+110,y+4.3);
+    y+=7;
+    visitas.forEach((vis,i)=>{
+      checkY(8);
+      setFill(i%2===0?'FFFFFF':'F5F8FC');doc.rect(mg,y,cw,7,'F');
+      setTxt('1a1a1a');doc.setFontSize(8.5);doc.setFont('helvetica','normal');
+      doc.text(vis.hora,mg+1,y+4.8);
+      doc.text(vis.visitante,mg+21,y+4.8,{maxWidth:57});
+      doc.text(vis.dur,mg+80,y+4.8,{maxWidth:28});
+      doc.text(vis.resp,mg+110,y+4.8,{maxWidth:cw-96});
+      y+=8;
+    });
+    y+=2;
+  }
+
+  // ─── OBSERVACIONES GENERALES ───
+  secHeader('OBSERVACIONES GENERALES','📝');
+  fieldFull('Observaciones',v('obs_generales'),true);
+
+  // ─── FOOTER cada pagina ───
+  const pageCount=doc.getNumberOfPages();
+  for(let i=1;i<=pageCount;i++){
+    doc.setPage(i);
+    setFill('1F4E79');doc.rect(0,288,W,9,'F');
+    setTxt('FFFFFF');doc.setFontSize(7);doc.setFont('helvetica','normal');
+    doc.text('Sra. Ursula — Turno Dia '+fecha+' — Tecnicas: '+(t1||'?')+' / '+(t2||'?'),mg,293);
+    doc.text('Pag '+i+' / '+pageCount,W-mg,293,{align:'right'});
+  }
+
+  const fname='TurnoDia_'+fDateFile(fechaVal)+'.pdf';
+  doc.save(fname);
+  showToast('PDF guardado: '+fname);
+}
+
+function limpiar(){
+  if(!confirm('Limpiar todo el formulario?')) return;
+  document.querySelectorAll('input,select,textarea').forEach(el=>el.value='');
+  document.querySelectorAll('.check-box').forEach(el=>el.classList.remove('checked'));
+  // reset paseos a uno
+  const c=document.getElementById('paseos-container');
+  c.innerHTML='<div class="paseo-row"><label>De</label><input type="time" class="paseo-desde"><label>a</label><input type="time" class="paseo-hasta"><input type="text" class="paseo-lugar" placeholder="Lugar (parque, casa...)"><button class="del-btn" onclick="delPaseo(this)">×</button></div>';
+}
+</script>
+</body>
+</html>
