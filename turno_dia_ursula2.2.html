@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Turno Dia - Sra. Ursula</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:Arial,sans-serif;background:#f0f4f8;color:#1a1a1a;font-size:15px}
+.header{background:#1F4E79;color:#fff;padding:12px 16px;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,0.3)}
+.header-top{display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:17px;font-weight:700;line-height:1.2}
+.header p{font-size:12px;opacity:0.75;margin-top:2px}
+.btn-gen-top{background:#e67e22;color:#fff;border:none;padding:9px 14px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;margin-left:10px}
+.wrap{padding:12px 12px 110px}
+.sec{margin-bottom:14px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.1)}
+.sec-title{background:#1F4E79;color:#fff;padding:9px 14px;font-size:13px;font-weight:700;letter-spacing:0.04em}
+.sec-body{padding:14px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.field-row.one{grid-template-columns:1fr}
+.field{display:flex;flex-direction:column;gap:4px}
+label{font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.04em}
+input[type=text],input[type=date],input[type=time],select,textarea{width:100%;font-size:14px;padding:9px 11px;border:1.5px solid #d0d8e4;border-radius:8px;background:#fafbfc;color:#1a1a1a;font-family:Arial,sans-serif;-webkit-appearance:none;appearance:none}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#2E75B6;background:#fff}
+textarea{resize:vertical;min-height:80px;line-height:1.5}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.sub{font-size:11px;font-weight:700;color:#2E75B6;margin:14px 0 7px;text-transform:uppercase;letter-spacing:0.05em;border-left:3px solid #2E75B6;padding-left:8px}
+.sv-block{background:#f0f4f8;border-radius:10px;padding:12px;margin-bottom:10px}
+.sv-block-title{font-size:12px;font-weight:700;color:#1F4E79;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.hora-badge{background:#1F4E79;color:#fff;font-size:11px;padding:2px 10px;border-radius:20px;font-weight:700}
+.sv-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* Med */
+.med-group{margin-bottom:12px;border-radius:10px;overflow:hidden;border:1.5px solid #e0e0e0}
+.med-group-title{padding:8px 12px;font-size:12px;font-weight:700;color:#fff;letter-spacing:0.03em}
+.med-row{display:flex;align-items:center;padding:10px 12px;border-top:1px solid #ebebeb;gap:10px;min-height:50px}
+.med-row:first-of-type{border-top:none}
+.med-name{flex:1;font-size:13px;font-weight:600;color:#1a1a1a;line-height:1.3}
+.med-dosis{font-size:12px;color:#666;text-align:right;min-width:80px;line-height:1.3}
+.chk{width:40px;height:40px;border:2.5px solid #ccc;border-radius:10px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#fff;transition:all 0.15s;user-select:none;font-size:22px;color:transparent}
+.chk.on{background:#27ae60;border-color:#27ae60;color:#fff}
+.chk.on::after{content:'✓'}
+.med-extra-row{display:flex;align-items:center;padding:7px 12px;border-top:1px solid #ebebeb;gap:10px;background:#fafafa}
+.med-extra-row input{flex:1;border:1.5px solid #ddd;border-radius:8px;padding:8px 10px;font-size:13px;background:#fff;font-family:Arial,sans-serif}
+.g-antes{background:#d4874a}.g-desa{background:#c0392b}.g-almu{background:#3a6db5}
+.g-tera{background:#9b8a2a}.g-cena{background:#2e7d32}.g-cond{background:#7b3fa0}
+/* Meals */
+.meal-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px}
+.meal-table th{background:#1F4E79;color:#fff;padding:6px 5px;text-align:left;font-weight:700;font-size:11px}
+.meal-table td{border:1px solid #e0e0e0;padding:4px 4px}
+.meal-lbl{background:#D6E4F0;font-weight:700;color:#1F4E79;font-size:12px;white-space:nowrap;padding:5px 7px!important}
+.meal-table td input,.meal-table td select{border:none;background:transparent;font-size:12px;padding:3px 3px;width:100%;font-family:Arial,sans-serif;-webkit-appearance:none;background-image:none}
+/* Chips */
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.chip{padding:8px 14px;border-radius:20px;border:1.5px solid #d0d8e4;background:#fafbfc;font-size:13px;cursor:pointer;user-select:none;transition:all 0.12s;font-family:Arial,sans-serif;color:#333}
+.chip.on{background:#1F4E79;color:#fff;border-color:#1F4E79;font-weight:700}
+/* Paseos */
+.paseo-row{display:flex;align-items:center;gap:6px;margin-bottom:8px;background:#f0f4f8;border-radius:8px;padding:8px 10px;flex-wrap:wrap}
+.paseo-lbl{font-size:12px;color:#555;font-weight:700;white-space:nowrap}
+.paseo-row input[type=time]{width:90px;font-size:13px;padding:7px 7px;flex-shrink:0}
+.paseo-row select{flex:1;min-width:110px;font-size:13px;padding:7px 8px}
+.del-btn{background:none;border:none;color:#e74c3c;font-size:22px;cursor:pointer;padding:0 3px;line-height:1;flex-shrink:0;font-weight:700}
+.add-btn{background:none;border:1.5px dashed #2E75B6;color:#2E75B6;padding:9px 14px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;width:100%;margin-top:4px}
+.vis-card{background:#f8f9fb;border-radius:10px;padding:10px 12px;margin-bottom:10px;border:1px solid #e8eaf0}
+.vis-card .field-row{margin-bottom:8px}
+.btm-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #ddd;padding:10px 14px;display:flex;gap:8px;z-index:200;box-shadow:0 -2px 10px rgba(0,0,0,0.1)}
+.btn-pdf{flex:1;background:#e67e22;color:#fff;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer}
+.btn-clear{background:#fff;color:#c0392b;border:1.5px solid #c0392b;padding:14px 16px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#27ae60;color:#fff;padding:10px 22px;border-radius:25px;font-size:14px;font-weight:700;z-index:300;display:none;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.2)}
+.toast.err{background:#e74c3c}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-top">
+    <div><h1>Turno Dia — Sra. Ursula</h1><p>Reporte de enfermeria</p></div>
+    <button class="btn-gen-top" onclick="generarPDF()">Generar reporte</button>
+  </div>
+</div>
+<div class="wrap">
+
+<!-- 1. DATOS -->
+<div class="sec">
+  <div class="sec-title">1. DATOS DEL TURNO</div>
+  <div class="sec-body">
+    <div class="field-row one"><div class="field"><label>Fecha</label><input type="date" id="fecha"></div></div>
+    <div class="field-row">
+      <div class="field"><label>Tecnica 1</label><input type="text" id="tecnica1" placeholder="Nombre completo"></div>
+      <div class="field"><label>Tecnica 2</label><input type="text" id="tecnica2" placeholder="Nombre completo"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. SIGNOS VITALES -->
+<div class="sec">
+  <div class="sec-title">2. SIGNOS VITALES</div>
+  <div class="sec-body">
+    <div class="sv-block">
+      <div class="sv-block-title">Al inicio del turno <span class="hora-badge">08:00</span></div>
+      <div class="sv-grid">
+        <div class="field" style="grid-column:1/-1"><label>Temperatura (°C)</label>
+          <select id="temp1"><option value="">--</option><option>34.0</option><option>34.5</option><option>35.0</option><option>35.5</option><option>35.6</option><option>35.7</option><option>35.8</option><option>35.9</option><option>36.0</option><option>36.1</option><option>36.2</option><option>36.3</option><option>36.4</option><option>36.5</option><option>36.6</option><option>36.7</option><option>36.8</option><option>36.9</option><option>37.0</option><option>37.1</option><option>37.2</option><option>37.3</option><option>37.4</option><option>37.5</option><option>37.6</option><option>37.7</option><option>37.8</option><option>37.9</option><option>38.0</option><option>38.1</option><option>38.2</option><option>38.3</option><option>38.4</option><option>38.5</option><option>39.0</option><option>39.5</option><option>40.0</option><option>40.5</option><option>41.0</option><option>42.0</option></select>
+        </div>
+        <div class="field"><label>Frec. cardiaca (lpm)</label>
+          <select id="fc1"><option value="">--</option>
+          <option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option><option>51</option><option>52</option><option>53</option><option>54</option><option>55</option><option>56</option><option>57</option><option>58</option><option>59</option><option>60</option><option>61</option><option>62</option><option>63</option><option>64</option><option>65</option><option>66</option><option>67</option><option>68</option><option>69</option><option>70</option><option>71</option><option>72</option><option>73</option><option>74</option><option>75</option><option>76</option><option>77</option><option>78</option><option>79</option><option>80</option><option>81</option><option>82</option><option>83</option><option>84</option><option>85</option><option>86</option><option>87</option><option>88</option><option>89</option><option>90</option><option>91</option><option>92</option><option>93</option><option>94</option><option>95</option><option>96</option><option>97</option><option>98</option><option>99</option><option>100</option><option>102</option><option>104</option><option>106</option><option>108</option><option>110</option><option>115</option><option>120</option><option>130</option><option>140</option></select>
+        </div>
+        <div class="field"><label>Presion arterial</label>
+          <div style="display:flex;gap:4px;align-items:center">
+            <select id="pa1s" style="flex:1;font-size:13px;padding:8px 5px">
+              <option value="">--</option><option>80</option><option>82</option><option>84</option><option>86</option><option>88</option><option>90</option><option>92</option><option>94</option><option>96</option><option>98</option><option>100</option><option>102</option><option>104</option><option>106</option><option>108</option><option>110</option><option>112</option><option>114</option><option>116</option><option>118</option><option>120</option><option>122</option><option>124</option><option>126</option><option>128</option><option>130</option><option>132</option><option>134</option><option>136</option><option>138</option><option>140</option><option>145</option><option>150</option><option>155</option><option>160</option><option>165</option><option>170</option><option>175</option><option>180</option>
+            </select>
+            <span style="font-weight:700;color:#888;font-size:16px">/</span>
+            <select id="pa1d" style="flex:1;font-size:13px;padding:8px 5px">
+              <option value="">--</option><option>40</option><option>42</option><option>44</option><option>46</option><option>48</option><option>50</option><option>52</option><option>54</option><option>56</option><option>58</option><option>60</option><option>62</option><option>64</option><option>66</option><option>68</option><option>70</option><option>72</option><option>74</option><option>76</option><option>78</option><option>80</option><option>82</option><option>84</option><option>86</option><option>88</option><option>90</option><option>92</option><option>94</option><option>96</option><option>98</option><option>100</option><option>105</option><option>110</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" style="grid-column:1/-1"><label>Saturacion O2 (%)</label>
+          <select id="sat1"><option value="">--</option><option>85</option><option>86</option><option>87</option><option>88</option><option>89</option><option>90</option><option>91</option><option>92</option><option>93</option><option>94</option><option>95</option><option>96</option><option>97</option><option>98</option><option>99</option><option>100</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="sv-block">
+      <div class="sv-block-title">Al final del turno <span class="hora-badge">19:00</span></div>
+      <div class="sv-grid">
+        <div class="field" style="grid-column:1/-1"><label>Temperatura (°C)</label>
+          <select id="temp2"><option value="">--</option><option>34.0</option><option>34.5</option><option>35.0</option><option>35.5</option><option>35.6</option><option>35.7</option><option>35.8</option><option>35.9</option><option>36.0</option><option>36.1</option><option>36.2</option><option>36.3</option><option>36.4</option><option>36.5</option><option>36.6</option><option>36.7</option><option>36.8</option><option>36.9</option><option>37.0</option><option>37.1</option><option>37.2</option><option>37.3</option><option>37.4</option><option>37.5</option><option>37.6</option><option>37.7</option><option>37.8</option><option>37.9</option><option>38.0</option><option>38.1</option><option>38.2</option><option>38.3</option><option>38.4</option><option>38.5</option><option>39.0</option><option>39.5</option><option>40.0</option><option>40.5</option><option>41.0</option><option>42.0</option></select>
+        </div>
+        <div class="field"><label>Frec. cardiaca (lpm)</label>
+          <select id="fc2"><option value="">--</option>
+          <option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option><option>51</option><option>52</option><option>53</option><option>54</option><option>55</option><option>56</option><option>57</option><option>58</option><option>59</option><option>60</option><option>61</option><option>62</option><option>63</option><option>64</option><option>65</option><option>66</option><option>67</option><option>68</option><option>69</option><option>70</option><option>71</option><option>72</option><option>73</option><option>74</option><option>75</option><option>76</option><option>77</option><option>78</option><option>79</option><option>80</option><option>81</option><option>82</option><option>83</option><option>84</option><option>85</option><option>86</option><option>87</option><option>88</option><option>89</option><option>90</option><option>91</option><option>92</option><option>93</option><option>94</option><option>95</option><option>96</option><option>97</option><option>98</option><option>99</option><option>100</option><option>102</option><option>104</option><option>106</option><option>108</option><option>110</option><option>115</option><option>120</option><option>130</option><option>140</option></select>
+        </div>
+        <div class="field"><label>Presion arterial</label>
+          <div style="display:flex;gap:4px;align-items:center">
+            <select id="pa2s" style="flex:1;font-size:13px;padding:8px 5px">
+              <option value="">--</option><option>80</option><option>82</option><option>84</option><option>86</option><option>88</option><option>90</option><option>92</option><option>94</option><option>96</option><option>98</option><option>100</option><option>102</option><option>104</option><option>106</option><option>108</option><option>110</option><option>112</option><option>114</option><option>116</option><option>118</option><option>120</option><option>122</option><option>124</option><option>126</option><option>128</option><option>130</option><option>132</option><option>134</option><option>136</option><option>138</option><option>140</option><option>145</option><option>150</option><option>155</option><option>160</option><option>165</option><option>170</option><option>175</option><option>180</option>
+            </select>
+            <span style="font-weight:700;color:#888;font-size:16px">/</span>
+            <select id="pa2d" style="flex:1;font-size:13px;padding:8px 5px">
+              <option value="">--</option><option>40</option><option>42</option><option>44</option><option>46</option><option>48</option><option>50</option><option>52</option><option>54</option><option>56</option><option>58</option><option>60</option><option>62</option><option>64</option><option>66</option><option>68</option><option>70</option><option>72</option><option>74</option><option>76</option><option>78</option><option>80</option><option>82</option><option>84</option><option>86</option><option>88</option><option>90</option><option>92</option><option>94</option><option>96</option><option>98</option><option>100</option><option>105</option><option>110</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" style="grid-column:1/-1"><label>Saturacion O2 (%)</label>
+          <select id="sat2"><option value="">--</option><option>85</option><option>86</option><option>87</option><option>88</option><option>89</option><option>90</option><option>91</option><option>92</option><option>93</option><option>94</option><option>95</option><option>96</option><option>97</option><option>98</option><option>99</option><option>100</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="field-row one"><div class="field"><label>Estado general</label>
+      <select id="estado"><option value="">Seleccionar...</option><option>Tranquila y colaboradora</option><option>Tranquila con momentos de ansiedad</option><option>Ansiosa / inquieta</option><option>Llorosa</option><option>Agitada (leve)</option><option>Agitada (moderada)</option><option>Agitada (severa)</option><option>Agresiva</option></select>
+    </div></div>
+    <div class="field-row one"><div class="field"><label>Observaciones</label><textarea id="sv_obs"></textarea></div></div>
+  </div>
+</div>
+
+<!-- 3. MEDICACION -->
+<div class="sec">
+  <div class="sec-title">3. MEDICACION ADMINISTRADA</div>
+  <div class="sec-body">
+    <div class="med-group">
+      <div class="med-group-title g-antes">ANTES DEL DESAYUNO</div>
+      <div class="med-row"><div class="med-name">Vit C</div><div class="med-dosis">1 tab</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med-row"><div class="med-name">Meteospasmyl 300mg</div><div class="med-dosis">1 cap</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med-row"><div class="med-name">Lenzetto spray</div><div class="med-dosis">2 puff post-bano</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+    </div>
+    <div class="med-group">
+      <div class="med-group-title g-desa">DESAYUNO</div>
+      <div class="med-row"><div class="med-name">Sertralina 50mg</div><div class="med-dosis">1/2 tab</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med-row"><div class="med-name">Propanolol 40mg</div><div class="med-dosis">1/2 tab</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med-row"><div class="med-name">Compl B6</div><div class="med-dosis">1 tab</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+    </div>
+    <div class="med-group">
+      <div class="med-group-title g-almu">ALMUERZO</div>
+      <div class="med-row"><div class="med-name">Propanolol 40mg</div><div class="med-dosis">1 tab</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med-row"><div class="med-name">Clonazepam 0.5mg</div><div class="med-dosis">1 tab</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med-row"><div class="med-name">Compl B6</div><div class="med-dosis">1 tab</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+    </div>
+    <div class="med-group">
+      <div class="med-group-title g-tera">DESPUES DE TERAPIA</div>
+      <div class="med-row"><div class="med-name">Supracalm 1gr</div><div class="med-dosis">1 tab (condicional)</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+    </div>
+    <div class="med-group">
+      <div class="med-group-title g-cena">CENA</div>
+      <div class="med-row"><div class="med-name">Quetiapina 25mg</div><div class="med-dosis">1/2 tab</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med-row"><div class="med-name">Compl B6</div><div class="med-dosis">1 tab</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med-row"><div class="med-name">Propanolol 40mg</div><div class="med-dosis">1/2 tab</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med-row"><div class="med-name">Supracalm 1gr</div><div class="med-dosis">1 tab</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med-row"><div class="med-name">Meteospasmyl 300mg</div><div class="med-dosis">1 cap</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+    </div>
+    <div class="med-group">
+      <div class="med-group-title g-cond">CONDICIONAL</div>
+      <div class="med-row"><div class="med-name">Orfenadrina 100mg</div><div class="med-dosis">1 tab</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+    </div>
+    <div class="sub">Medicamentos adicionales</div>
+    <div class="med-group" id="extra-meds">
+      <div class="med-extra-row"><input type="text" placeholder="Medicamento y dosis"><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med-extra-row"><input type="text" placeholder="Medicamento y dosis"><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med-extra-row"><input type="text" placeholder="Medicamento y dosis"><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+    </div>
+    <div class="field-row one" style="margin-top:10px"><div class="field"><label>Observaciones</label><textarea id="med_obs"></textarea></div></div>
+  </div>
+</div>
+
+<!-- 4. NUTRICION -->
+<div class="sec">
+  <div class="sec-title">4. NUTRICION E HIDRATACION</div>
+  <div class="sec-body">
+    <table class="meal-table">
+      <thead><tr><th>Comida</th><th>Hora</th><th>Alimentos</th><th>%</th><th>Obs.</th></tr></thead>
+      <tbody>
+        <tr><td class="meal-lbl">Desayuno</td><td><input type="time" class="mhora"></td><td><input type="text" class="mal"></td><td><select class="mpc" style="min-width:52px"><option value="">--%</option><option>0%</option><option>5%</option><option>10%</option><option>15%</option><option>20%</option><option>25%</option><option>30%</option><option>35%</option><option>40%</option><option>45%</option><option>50%</option><option>55%</option><option>60%</option><option>65%</option><option>70%</option><option>75%</option><option>80%</option><option>85%</option><option>90%</option><option>95%</option><option>100%</option></select></td><td><input type="text" class="mob"></td></tr>
+        <tr><td class="meal-lbl">Almuerzo</td><td><input type="time" class="mhora"></td><td><input type="text" class="mal"></td><td><select class="mpc" style="min-width:52px"><option value="">--%</option><option>0%</option><option>5%</option><option>10%</option><option>15%</option><option>20%</option><option>25%</option><option>30%</option><option>35%</option><option>40%</option><option>45%</option><option>50%</option><option>55%</option><option>60%</option><option>65%</option><option>70%</option><option>75%</option><option>80%</option><option>85%</option><option>90%</option><option>95%</option><option>100%</option></select></td><td><input type="text" class="mob"></td></tr>
+        <tr><td class="meal-lbl">Cena</td><td><input type="time" class="mhora"></td><td><input type="text" class="mal"></td><td><select class="mpc" style="min-width:52px"><option value="">--%</option><option>0%</option><option>5%</option><option>10%</option><option>15%</option><option>20%</option><option>25%</option><option>30%</option><option>35%</option><option>40%</option><option>45%</option><option>50%</option><option>55%</option><option>60%</option><option>65%</option><option>70%</option><option>75%</option><option>80%</option><option>85%</option><option>90%</option><option>95%</option><option>100%</option></select></td><td><input type="text" class="mob"></td></tr>
+        <tr><td class="meal-lbl">Merienda</td><td><input type="time" class="mhora"></td><td><input type="text" class="mal"></td><td><select class="mpc" style="min-width:52px"><option value="">--%</option><option>0%</option><option>5%</option><option>10%</option><option>15%</option><option>20%</option><option>25%</option><option>30%</option><option>35%</option><option>40%</option><option>45%</option><option>50%</option><option>55%</option><option>60%</option><option>65%</option><option>70%</option><option>75%</option><option>80%</option><option>85%</option><option>90%</option><option>95%</option><option>100%</option></select></td><td><input type="text" class="mob"></td></tr>
+      </tbody>
+    </table>
+    <div class="sub">Hidratacion</div>
+    <div class="field-row one"><div class="field"><label>Total de liquidos</label>
+      <select id="liq_sel"><option value="">--</option><option>50 ml</option><option>100 ml</option><option>150 ml</option><option>200 ml</option><option>250 ml</option><option>300 ml</option><option>350 ml</option><option>400 ml</option><option>450 ml</option><option>500 ml</option><option>550 ml</option><option>600 ml</option><option>650 ml</option><option>700 ml</option><option>750 ml</option><option>800 ml</option><option>850 ml</option><option>900 ml</option><option>950 ml</option><option>1000 ml</option><option>1100 ml</option><option>1200 ml</option><option>1300 ml</option><option>1400 ml</option><option>1500 ml</option><option>1600 ml</option><option>1700 ml</option><option>1800 ml</option><option>1900 ml</option><option>2000 ml</option></select>
+    </div></div>
+    <div class="field"><label>Tipos de liquido</label></div>
+    <div class="chips" style="margin-top:6px">
+      <div class="chip" onclick="this.classList.toggle('on')" data-val="Agua">Agua</div>
+      <div class="chip" onclick="this.classList.toggle('on')" data-val="Infusion/te">Infusion</div>
+      <div class="chip" onclick="this.classList.toggle('on')" data-val="Jugo">Jugo</div>
+      <div class="chip" onclick="this.classList.toggle('on')" data-val="Caldo">Caldo</div>
+      <div class="chip" onclick="this.classList.toggle('on')" data-val="Leche">Leche</div>
+      <div class="chip" onclick="this.classList.toggle('on')" data-val="Sopa">Sopa</div>
+      <div class="chip" onclick="this.classList.toggle('on')" data-val="Gelatina">Gelatina</div>
+    </div>
+    <div class="field-row one"><div class="field"><label>Observaciones</label><textarea id="nutricion_obs"></textarea></div></div>
+  </div>
+</div>
+
+<!-- 5. HIGIENE -->
+<div class="sec">
+  <div class="sec-title">5. HIGIENE Y CUIDADO FISICO</div>
+  <div class="sec-body">
+    <div class="field-row">
+      <div class="field"><label>Bano realizado</label><select id="bano"><option value="">Seleccionar...</option><option>Si</option><option>No</option></select></div>
+      <div class="field"><label>Tipo</label><select id="bano_tipo"><option value="">Seleccionar...</option><option>Ducha</option><option>Esponja / cama</option></select></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Hora del bano</label><input type="time" id="bano_hora"></div>
+      <div class="field"><label>Colaboracion</label><select id="bano_colab"><option value="">Seleccionar...</option><option>Si, colaboro</option><option>Parcialmente</option><option>No colaboro</option></select></div>
+    </div>
+    <div class="field-row one"><div class="field"><label>Observaciones</label><textarea id="bano_obs"></textarea></div></div>
+    <div class="field-row">
+      <div class="field"><label>Higiene bucal</label><select id="bucal"><option value="">Seleccionar...</option><option>Si</option><option>No</option></select></div>
+      <div class="field"><label>Hora</label><input type="time" id="bucal_hora"></div>
+    </div>
+    <div class="sub">Deposicion</div>
+    <div class="field-row">
+      <div class="field"><label>Realizo deposicion</label><select id="depo"><option value="">Seleccionar...</option><option>Si</option><option>No</option></select></div>
+      <div class="field"><label>Hora</label><input type="time" id="depo_hora"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Cantidad</label><select id="depo_cant"><option value="">Seleccionar...</option><option>Abundante</option><option>Normal</option><option>Escasa</option></select></div>
+      <div class="field"><label>Consistencia</label><select id="depo_cons"><option value="">Seleccionar...</option><option>Normal</option><option>Blanda</option><option>Liquida</option><option>Dura</option></select></div>
+    </div>
+    <div class="field-row one"><div class="field"><label>Observaciones</label><textarea id="depo_obs"></textarea></div></div>
+    <div class="sub">Micciones</div>
+    <div class="field-row">
+      <div class="field"><label>N de cambios de panal</label><select id="mictions"><option value="">--</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select></div>
+      <div class="field"><label>Presencia de orina</label><select id="orina"><option value="">Seleccionar...</option><option>Si, en todos</option><option>En algunos cambios</option><option>No se detecto</option></select></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Color de la orina</label><select id="orina_color"><option value="">Seleccionar...</option><option>Amarillo claro (normal)</option><option>Amarillo oscuro</option><option>Naranja</option><option>Marron</option><option>Con sangre</option></select></div>
+      <div class="field"><label>Hora ultimo cambio</label><input type="time" id="ultimo_cambio"></div>
+    </div>
+    <div class="field-row one"><div class="field"><label>Observaciones</label><textarea id="orina_obs"></textarea></div></div>
+  </div>
+</div>
+
+<!-- 6. ESTADO DE ANIMO -->
+<div class="sec">
+  <div class="sec-title">6. ESTADO DE ANIMO GENERAL</div>
+  <div class="sec-body">
+    <div class="field-row one"><div class="field"><label>Estado de animo</label>
+      <select id="animo"><option value="">Seleccionar...</option><option>Tranquila y colaboradora</option><option>Tranquila con momentos de ansiedad</option><option>Ansiosa / inquieta</option><option>Llorosa</option><option>Agitada (leve)</option><option>Agitada (moderada)</option><option>Agitada (severa)</option><option>Agresiva</option></select>
+    </div></div>
+    <div class="field-row one"><div class="field"><label>Observaciones</label><textarea id="animo_obs"></textarea></div></div>
+  </div>
+</div>
+
+<!-- 7. ACTIVIDAD -->
+<div class="sec">
+  <div class="sec-title">7. ACTIVIDAD FISICA</div>
+  <div class="sec-body">
+    <div class="sub">Paseos y caminatas</div>
+    <div id="paseos-container">
+      <div class="paseo-row">
+        <span class="paseo-lbl">De</span><input type="time" class="paseo-desde">
+        <span class="paseo-lbl">a</span><input type="time" class="paseo-hasta">
+        <select class="paseo-lugar"><option value="">Lugar...</option><option>Parque</option><option>Calle</option><option>Centro comercial</option><option>Casa (interior)</option><option>Jardin</option><option>Otro</option></select>
+        <button class="del-btn" onclick="delPaseo(this)">x</button>
+      </div>
+    </div>
+    <button class="add-btn" onclick="addPaseo()">+ Agregar paseo</button>
+    <div class="field-row one" style="margin-top:12px"><div class="field"><label>Calidad de la marcha</label>
+      <select id="marcha"><option value="">Seleccionar...</option><option>Normal</option><option>Lenta</option><option>Inestable</option><option>Muy lenta / con apoyo</option></select>
+    </div></div>
+    <div class="field-row one"><div class="field"><label>Observaciones</label><textarea id="activ_obs"></textarea></div></div>
+  </div>
+</div>
+
+<!-- 8. VISITAS -->
+<div class="sec">
+  <div class="sec-title">8. VISITAS Y EVENTOS</div>
+  <div class="sec-body">
+    <div id="vis-container">
+      <div class="vis-card">
+        <div class="field-row">
+          <div class="field"><label>Hora</label><input type="time" class="vis-hora"></div>
+          <div class="field"><label>Visitante</label><input type="text" class="vis-nombre" placeholder="Nombre"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Duracion</label><select class="vis-dur"><option value="">--</option><option>15 min</option><option>30 min</option><option>45 min</option><option>1 hora</option><option>1.5 horas</option><option>2 horas</option><option>Mas de 2 horas</option><option>Todo el dia</option></select></div>
+          <div class="field"><label>Respuesta de Ursula</label><select class="vis-resp"><option value="">--</option><option>Muy contenta y activa</option><option>Tranquila y receptiva</option><option>Indiferente</option><option>Algo agitada</option><option>Muy agitada</option></select></div>
+        </div>
+      </div>
+    </div>
+    <button class="add-btn" onclick="addVisita()">+ Agregar visita</button>
+  </div>
+</div>
+
+<!-- 9. OBSERVACIONES -->
+<div class="sec">
+  <div class="sec-title">9. OBSERVACIONES GENERALES</div>
+  <div class="sec-body">
+    <div class="field-row one"><div class="field"><textarea id="obs_generales" placeholder="Escribe aqui cualquier observacion del turno..." style="min-height:120px"></textarea></div></div>
+  </div>
+</div>
+
+</div>
+<div class="btm-bar">
+  <button class="btn-pdf" onclick="generarPDF()">Generar reporte del turno</button>
+  <button class="btn-clear" onclick="limpiar()">X</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+function v(id){return document.getElementById(id)?.value?.trim()||'--';}
+function vOpt(id){return document.getElementById(id)?.value?.trim()||'';}
+function fDate(d){if(!d)return'--';const[y,m,da]=d.split('-');return da+'/'+m+'/'+y;}
+function fDateFile(d){if(!d)return'sin-fecha';const[y,m,da]=d.split('-');return da+'-'+m+'-'+y;}
+function getLiq(){return v('liq_sel');}
+function getChips(){return Array.from(document.querySelectorAll('.chip.on')).map(c=>c.dataset.val).join(', ')||'--';}
+
+function getMeds(){
+  const groups={};
+  const order=['Antes desayuno','Desayuno','Almuerzo','Despues terapia','Cena','Condicional','Adicional'];
+  order.forEach(k=>groups[k]=[]);
+  document.querySelectorAll('.med-row').forEach(r=>{
+    const nameEl=r.querySelector('.med-name');
+    const dosisEl=r.querySelector('.med-dosis');
+    const chk=r.querySelector('.chk');
+    if(!nameEl||!chk)return;
+    const title=r.closest('.med-group')?.querySelector('.med-group-title')?.textContent?.trim()||'';
+    let key='Adicional';
+    if(title.includes('ANTES'))key='Antes desayuno';
+    else if(title.includes('DESAYUNO'))key='Desayuno';
+    else if(title.includes('ALMUERZO'))key='Almuerzo';
+    else if(title.includes('TERAPIA'))key='Despues terapia';
+    else if(title.includes('CENA'))key='Cena';
+    else if(title.includes('CONDICIONAL'))key='Condicional';
+    groups[key].push({nombre:nameEl.textContent.trim(),dosis:dosisEl?.textContent.trim()||'',checked:chk.classList.contains('on')});
+  });
+  document.querySelectorAll('.med-extra-row').forEach(r=>{
+    const inp=r.querySelector('input');const chk=r.querySelector('.chk');
+    if(!inp||!chk||!inp.value.trim())return;
+    groups['Adicional'].push({nombre:inp.value.trim(),dosis:'',checked:chk.classList.contains('on')});
+  });
+  return groups;
+}
+
+function getMeals(){
+  const nm=['Desayuno','Almuerzo','Cena','Merienda'];
+  return Array.from(document.querySelectorAll('.meal-table tbody tr')).map((r,i)=>({
+    comida:nm[i],
+    hora:r.querySelector('.mhora')?.value||'',
+    alimentos:r.querySelector('.mal')?.value||'--',
+    pct:r.querySelector('.mpc')?.value||'--',
+    obs:r.querySelector('.mob')?.value||''
+  }));
+}
+
+function getPaseos(){
+  return Array.from(document.querySelectorAll('.paseo-row')).map(r=>({
+    desde:r.querySelector('.paseo-desde')?.value||'',
+    hasta:r.querySelector('.paseo-hasta')?.value||'',
+    lugar:r.querySelector('.paseo-lugar')?.value||''
+  })).filter(p=>p.desde||p.lugar);
+}
+
+function getVisitas(){
+  return Array.from(document.querySelectorAll('.vis-card')).map(r=>({
+    hora:r.querySelector('.vis-hora')?.value||'',
+    nombre:r.querySelector('.vis-nombre')?.value?.trim()||'',
+    dur:r.querySelector('.vis-dur')?.value||'',
+    resp:r.querySelector('.vis-resp')?.value||''
+  })).filter(vi=>vi.hora||vi.nombre);
+}
+
+function addPaseo(){
+  const c=document.getElementById('paseos-container');
+  const d=document.createElement('div');d.className='paseo-row';
+  d.innerHTML='<span class="paseo-lbl">De</span><input type="time" class="paseo-desde"><span class="paseo-lbl">a</span><input type="time" class="paseo-hasta"><select class="paseo-lugar"><option value="">Lugar...</option><option>Parque</option><option>Calle</option><option>Centro comercial</option><option>Casa (interior)</option><option>Jardin</option><option>Otro</option></select><button class="del-btn" onclick="delPaseo(this)">x</button>';
+  c.appendChild(d);
+}
+function delPaseo(btn){if(document.querySelectorAll('.paseo-row').length>1)btn.parentElement.remove();}
+
+function addVisita(){
+  const c=document.getElementById('vis-container');
+  const d=document.createElement('div');d.className='vis-card';
+  d.innerHTML='<div class="field-row"><div class="field"><label>Hora</label><input type="time" class="vis-hora"></div><div class="field"><label>Visitante</label><input type="text" class="vis-nombre" placeholder="Nombre"></div></div><div class="field-row"><div class="field"><label>Duracion</label><select class="vis-dur"><option value="">--</option><option>15 min</option><option>30 min</option><option>45 min</option><option>1 hora</option><option>1.5 horas</option><option>2 horas</option><option>Mas de 2 horas</option><option>Todo el dia</option></select></div><div class="field"><label>Respuesta de Ursula</label><select class="vis-resp"><option value="">--</option><option>Muy contenta y activa</option><option>Tranquila y receptiva</option><option>Indiferente</option><option>Algo agitada</option><option>Muy agitada</option></select></div></div>';
+  c.appendChild(d);
+}
+
+function showToast(msg,err){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast'+(err?' err':'');
+  t.style.display='block';setTimeout(()=>t.style.display='none',3500);
+}
+
+function limpiar(){
+  if(!confirm('Limpiar todo el formulario?'))return;
+  document.querySelectorAll('input,select,textarea').forEach(el=>el.value='');
+  document.querySelectorAll('.chk,.chip').forEach(el=>el.classList.remove('on'));
+  document.getElementById('paseos-container').innerHTML='<div class="paseo-row"><span class="paseo-lbl">De</span><input type="time" class="paseo-desde"><span class="paseo-lbl">a</span><input type="time" class="paseo-hasta"><select class="paseo-lugar"><option value="">Lugar...</option><option>Parque</option><option>Calle</option><option>Centro comercial</option><option>Casa (interior)</option><option>Jardin</option><option>Otro</option></select><button class="del-btn" onclick="delPaseo(this)">x</button></div>';
+  document.getElementById('vis-container').innerHTML='<div class="vis-card"><div class="field-row"><div class="field"><label>Hora</label><input type="time" class="vis-hora"></div><div class="field"><label>Visitante</label><input type="text" class="vis-nombre" placeholder="Nombre"></div></div><div class="field-row"><div class="field"><label>Duracion</label><select class="vis-dur"><option value="">--</option><option>15 min</option><option>30 min</option><option>45 min</option><option>1 hora</option><option>1.5 horas</option><option>2 horas</option><option>Mas de 2 horas</option><option>Todo el dia</option></select></div><div class="field"><label>Respuesta de Ursula</label><select class="vis-resp"><option value="">--</option><option>Muy contenta y activa</option><option>Tranquila y receptiva</option><option>Indiferente</option><option>Algo agitada</option><option>Muy agitada</option></select></div></div></div>';
+}
+
+// ══ STATUS HELPERS ══
+function stsTemp(t){const n=parseFloat(t);if(isNaN(n))return'info';if(n>=38)return'alert';if(n>=37.5)return'warn';return'ok';}
+function stsFc(f){const n=parseInt(f);if(isNaN(n))return'info';if(n<50||n>110)return'alert';if(n<60||n>95)return'warn';return'ok';}
+function stsSat(s){const n=parseInt(s);if(isNaN(n))return'info';if(n<90)return'alert';if(n<94)return'warn';return'ok';}
+function stsAnimo(a){if(!a||a==='--')return'info';if(a.includes('severa')||a.includes('Agresiva'))return'alert';if(a.includes('Agitada')||a.includes('Llorosa')||a.includes('Ansiosa'))return'warn';return'ok';}
+function stsLiq(l){const n=parseInt(l);if(isNaN(n))return'info';if(n<1000)return'alert';if(n<1600)return'warn';return'ok';}
+function stsMeal(pct){const n=parseInt(pct);if(isNaN(n))return'info';if(n<40)return'alert';if(n<65)return'warn';return'ok';}
+function stsMed(meds){
+  let total=0,checked=0;
+  Object.values(meds).forEach(arr=>arr.forEach(m=>{total++;if(m.checked)checked++;}));
+  if(total===0)return'info';
+  if(checked===total)return'ok';
+  if(checked>=total*0.8)return'warn';
+  return'alert';
+}
+function medLabel(meds){
+  let total=0,checked=0;
+  Object.values(meds).forEach(arr=>arr.forEach(m=>{total++;if(m.checked)checked++;}));
+  if(total===0)return'Sin datos';
+  if(checked===total)return'Completa';
+  return checked+'/'+total+' tomadas';
+}
+function avgPct(meals){
+  const vs=meals.map(m=>parseInt(m.pct)||0).filter(n=>n>0);
+  return vs.length?Math.round(vs.reduce((a,b)=>a+b,0)/vs.length):null;
+}
+function liqLabel(l){
+  const n=parseInt(l);if(isNaN(n))return l;
+  if(n>=1600)return l+' (Adecuada)';
+  if(n>=1000)return l+' (Deficiente)';
+  return l+' (Insuficiente)';
+}
+function svStatus(tmp1,tmp2,fc1,fc2,sat1,sat2){
+  const statuses=[stsTemp(tmp1),stsTemp(tmp2),stsFc(fc1),stsFc(fc2),stsSat(sat1),stsSat(sat2)];
+  if(statuses.includes('alert'))return'alert';
+  if(statuses.includes('warn'))return'warn';
+  if(statuses.every(s=>s==='ok'))return'ok';
+  return'info';
+}
+
+const C={ok:'27AE60',warn:'E67E22',alert:'C0392B',info:'2E75B6'};
+const BG={ok:'E8F8F0',warn:'FEF9E7',alert:'FDEDEC',info:'EBF3FB'};
+const LABEL={ok:'Normal',warn:'Atencion',alert:'Alerta',info:'Sin datos'};
+
+// ══ PDF ══
+function generarPDF(){
+  const fechaVal=document.getElementById('fecha')?.value;
+  if(!fechaVal){showToast('Ingresa la fecha primero',true);return;}
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210,mg=10,cw=W-mg*2;
+  let y=0;
+
+  function h2r(h){return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+  function fl(c){const[r,g,b]=h2r(c);doc.setFillColor(r,g,b);}
+  function tc(c){const[r,g,b]=h2r(c);doc.setTextColor(r,g,b);}
+  function dc(c){const[r,g,b]=h2r(c);doc.setDrawColor(r,g,b);}
+  function checkY(n){if(y+n>282){doc.addPage();y=12;stripHdr();}}
+
+  function stripHdr(){
+    fl('1F4E79');doc.rect(0,0,W,8,'F');
+    tc('FFFFFF');doc.setFontSize(7);doc.setFont('helvetica','bold');
+    doc.text('Turno Dia - Sra. Ursula - '+fecha+' | '+t1+(t2!=='--'?' & '+t2:''),W/2,5.5,{align:'center'});
+    y=12;
+  }
+
+  function secHdr(n,title){
+    checkY(10);fl('1F4E79');doc.roundedRect(mg,y,cw,7,1.5,1.5,'F');
+    tc('FFFFFF');doc.setFontSize(8.5);doc.setFont('helvetica','bold');
+    doc.text(n+'. '+title,mg+3,y+5);y+=10;tc('1a1a1a');
+  }
+  function subLbl(t){
+    checkY(8);tc('2E75B6');doc.setFontSize(7);doc.setFont('helvetica','bold');
+    doc.text(t.toUpperCase(),mg,y+4);
+    dc('2E75B6');doc.setLineWidth(0.3);doc.line(mg+doc.getTextWidth(t.toUpperCase())+2,y+2,mg+cw,y+2);
+    y+=7;tc('1a1a1a');doc.setLineWidth(0.2);
+  }
+  function pair(l1,v1,l2,v2){
+    const hw=(cw-3)/2;checkY(12);
+    fl('EBF3FB');doc.rect(mg,y,hw,10,'F');
+    tc('1F4E79');doc.setFontSize(6);doc.setFont('helvetica','bold');doc.text(l1,mg+2,y+3.5);
+    tc('1a1a1a');doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text(String(v1||'--'),mg+2,y+8.5,{maxWidth:hw-4});
+    fl('EBF3FB');doc.rect(mg+hw+3,y,hw,10,'F');
+    tc('1F4E79');doc.setFontSize(6);doc.setFont('helvetica','bold');doc.text(l2,mg+hw+5,y+3.5);
+    tc('1a1a1a');doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text(String(v2||'--'),mg+hw+5,y+8.5,{maxWidth:hw-4});
+    y+=13;
+  }
+  function full(label,val,tall){
+    val=val||'--';const lines=doc.splitTextToSize(String(val),cw-4);
+    const h=tall?Math.max(12,lines.length*4.5+7):12;checkY(h+2);
+    fl('EBF3FB');doc.rect(mg,y,cw,h,'F');
+    if(label){tc('1F4E79');doc.setFontSize(6);doc.setFont('helvetica','bold');doc.text(label,mg+2,y+3.5);}
+    tc('1a1a1a');doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text(lines,mg+2,label?y+8.5:y+5);
+    y+=h+3;
+  }
+
+  // ── SUMMARY CARD ──
+  function sumCard(x,yy,w,h,icon,label,val,subval,st){
+    const cc=C[st]||C.info,bg=BG[st]||BG.info;
+    fl(bg);dc(cc);
+    const[r2,g2,b2]=h2r(cc);doc.setDrawColor(r2,g2,b2);doc.setLineWidth(0.8);
+    doc.roundedRect(x,yy,w,h,2,2,'FD');doc.setLineWidth(0.2);
+    // icon circle
+    fl(cc);doc.circle(x+w/2,yy+9,5,'F');
+    tc('FFFFFF');doc.setFontSize(9);doc.setFont('helvetica','bold');
+    doc.text(icon,x+w/2,yy+11.5,{align:'center'});
+    // label
+    tc(cc);doc.setFontSize(6.5);doc.setFont('helvetica','bold');
+    doc.text(label,x+w/2,yy+18,{align:'center'});
+    // value
+    tc('1a1a1a');doc.setFontSize(8.5);doc.setFont('helvetica','bold');
+    doc.text(String(val),x+w/2,yy+24,{align:'center',maxWidth:w-4});
+    // subval
+    if(subval){tc('666666');doc.setFontSize(6.5);doc.setFont('helvetica','normal');doc.text(String(subval),x+w/2,yy+29,{align:'center',maxWidth:w-4});}
+    // status dot
+    fl(cc);doc.circle(x+w-5,yy+5,2.5,'F');
+  }
+
+  // ── TIMELINE ENTRY ──
+  function tlEntry(time,icon,label,sub,color){
+    checkY(11);
+    const cc=color||'1F4E79';
+    fl(cc);doc.circle(mg+4,y+4,3.5,'F');
+    tc('FFFFFF');doc.setFontSize(7);doc.setFont('helvetica','bold');
+    doc.text(icon,mg+4,y+5.8,{align:'center'});
+    // vertical line
+    dc('CCCCCC');doc.setLineWidth(0.4);
+    doc.line(mg+4,y+7.5,mg+4,y+11);
+    doc.setLineWidth(0.2);
+    // time
+    tc('1F4E79');doc.setFontSize(7.5);doc.setFont('helvetica','bold');
+    doc.text(time||'',mg+10,y+5);
+    // label
+    tc('1a1a1a');doc.setFontSize(8.5);doc.setFont('helvetica','bold');
+    doc.text(label,mg+32,y+5,{maxWidth:cw-33});
+    if(sub){tc('777777');doc.setFontSize(7);doc.setFont('helvetica','normal');doc.text(sub,mg+32,y+9,{maxWidth:cw-33});}
+    y+=sub?12:10;
+  }
+
+  // ── SV TABLE ROW ──
+  function svRow(label,v1,v2,st,isLast){
+    checkY(8);
+    fl(isLast?'F0F4F8':'FFFFFF');doc.rect(mg,y,cw,7,'F');
+    dc('E0E0E0');doc.setLineWidth(0.2);doc.rect(mg,y,cw,7);
+    const c1=cw*0.32,c2=cw*0.27,c3=cw*0.27,c4=cw*0.14;
+    tc('555555');doc.setFontSize(7.5);doc.setFont('helvetica','bold');doc.text(label,mg+2,y+4.8);
+    tc('1a1a1a');doc.setFontSize(8);doc.setFont('helvetica','normal');
+    doc.text(String(v1||'--'),mg+c1+2,y+4.8);
+    doc.text(String(v2||'--'),mg+c1+c2+2,y+4.8);
+    // status badge
+    if(st&&st!=='info'){
+      fl(BG[st]);const[r2,g2,b2]=h2r(C[st]);doc.setFillColor(r2,g2,b2);
+      fl(C[st]);doc.roundedRect(mg+c1+c2+c3+2,y+1.5,c4-4,4,1,1,'F');
+      tc('FFFFFF');doc.setFontSize(6);doc.setFont('helvetica','bold');
+      doc.text(LABEL[st],mg+c1+c2+c3+2+(c4-4)/2,y+4.3,{align:'center'});
+    }
+    y+=8;
+  }
+
+  // collect data
+  const fecha=fDate(fechaVal);
+  const t1=v('tecnica1'),t2=v('tecnica2');
+  const tmp1=v('temp1'),tmp2=v('temp2');
+  const fc1=v('fc1'),fc2=v('fc2');
+  const pa1=(vOpt('pa1s')&&vOpt('pa1d'))?v('pa1s')+'/'+v('pa1d'):'--';
+  const pa2=(vOpt('pa2s')&&vOpt('pa2d'))?v('pa2s')+'/'+v('pa2d'):'--';
+  const sat1=v('sat1'),sat2=v('sat2');
+  const estado=v('estado'),animo=v('animo');
+  const liq=getLiq(),chips=getChips();
+  const bano=v('bano'),depo=v('depo');
+  const meals=getMeals(),paseos=getPaseos(),visitas=getVisitas();
+  const medGrupos=getMeds();
+  const avg=avgPct(meals);
+  const obsGen=v('obs_generales');
+
+  // ════════════════════════════════════════
+  // PAGINA 1 — PORTADA + RESUMEN
+  // ════════════════════════════════════════
+
+  // Header verde superior
+  fl('27AE60');doc.rect(0,0,W,6,'F');
+  tc('FFFFFF');doc.setFontSize(7);doc.setFont('helvetica','bold');
+  doc.text('TURNO DIA',mg,4.5);
+  y=10;
+
+  // Título izquierda
+  tc('1F4E79');doc.setFontSize(20);doc.setFont('helvetica','bold');
+  doc.text('Sra. Ursula',mg,y+8);y+=10;
+  tc('555555');doc.setFontSize(9);doc.setFont('helvetica','normal');
+  doc.text('Reporte de Enfermeria',mg,y+5);y+=8;
+
+  // Fecha y tecnicas box
+  fl('F0F4F8');doc.roundedRect(mg,y,65,20,2,2,'F');
+  tc('2E75B6');doc.setFontSize(6.5);doc.setFont('helvetica','bold');doc.text('FECHA',mg+3,y+5);
+  tc('1a1a1a');doc.setFontSize(10);doc.setFont('helvetica','bold');doc.text(fecha,mg+3,y+12);
+  tc('555555');doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.text('08:00 - 19:00',mg+3,y+18);
+
+  fl('F0F4F8');doc.roundedRect(mg+68,y,65,20,2,2,'F');
+  tc('2E75B6');doc.setFontSize(6.5);doc.setFont('helvetica','bold');doc.text('TECNICAS',mg+71,y+5);
+  tc('1a1a1a');doc.setFontSize(8.5);doc.setFont('helvetica','bold');
+  doc.text(t1,mg+71,y+12);
+  if(t2&&t2!=='--')doc.text(t2,mg+71,y+18);
+  y+=26;
+
+  // ── RESUMEN DEL TURNO ──
+  fl('1a1a1a');tc('1a1a1a');
+  doc.setFontSize(11);doc.setFont('helvetica','bold');doc.text('RESUMEN DEL TURNO',mg,y);y+=4;
+  tc('888888');doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.text('Lo mas importante del dia en un vistazo',mg,y);y+=6;
+
+  // 5 cards: Signos vitales, Medicacion, Alimentacion, Hidratacion, Estado
+  const cardW2=(cw-16)/5;
+  const svSt=svStatus(tmp1,tmp2,fc1,fc2,sat1,sat2);
+  const medSt=stsMed(medGrupos);
+  const mealSt=avg!==null?stsMeal(avg):'info';
+  const liqSt=stsLiq(parseInt(liq));
+  const animoSt=stsAnimo(animo);
+
+  sumCard(mg,y,cardW2,34,'V','SIGNOS VITALES',svSt==='ok'?'Estables':svSt==='warn'?'Atencion':'Alterados','Sat: '+sat1+'%',svSt);
+  sumCard(mg+cardW2+4,y,cardW2,34,'M','MEDICACION',medLabel(medGrupos),'',medSt);
+  sumCard(mg+(cardW2+4)*2,y,cardW2,34,'A','ALIMENTACION',avg!==null?'Prom. '+avg+'%':'Sin datos',avg!==null?(avg>=65?'Buen apetito':avg>=40?'Regular':'Poco apetito'):'',mealSt);
+  sumCard(mg+(cardW2+4)*3,y,cardW2,34,'H','HIDRATACION',liq,parseInt(liq)>=1600?'Adecuada':parseInt(liq)>=1000?'Deficiente':'Insuficiente',liqSt);
+  sumCard(mg+(cardW2+4)*4,y,cardW2,34,'E','ESTADO',animo!=='--'?animo.split('(')[0].trim().split(' ').slice(0,2).join(' '):'--','',animoSt);
+  y+=38;
+
+  // OBSERVACION GENERAL box
+  if(obsGen&&obsGen!=='--'){
+    fl('F0FFF4');dc('27AE60');const[rg,gg,bg2]=h2r('27AE60');doc.setDrawColor(rg,gg,bg2);doc.setLineWidth(0.5);
+    const obsLines=doc.splitTextToSize(obsGen,cw-8);
+    const obsH=Math.max(16,obsLines.length*4.5+10);
+    doc.roundedRect(mg,y,cw,obsH,2,2,'FD');doc.setLineWidth(0.2);
+    tc('27AE60');doc.setFontSize(7);doc.setFont('helvetica','bold');doc.text('OBSERVACION GENERAL',mg+3,y+5);
+    tc('1a1a1a');doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text(obsLines,mg+3,y+10);
+    y+=obsH+6;
+  }
+
+  // ── LINEA DE TIEMPO + SIGNOS VITALES (lado a lado) ──
+  const tlW=cw*0.52,svW=cw*0.44;
+  const tlX=mg,svX=mg+tlW+cw*0.04;
+
+  // collect events
+  const events=[];
+  events.push(['08:00','V','Inicio de turno','Signos vitales iniciales registrados','1F4E79']);
+  if(vOpt('bano_hora'))events.push([v('bano_hora'),'B','Bano',v('bano_tipo')+' / '+v('bano_colab'),'3498DB']);
+  if(vOpt('bucal_hora'))events.push([v('bucal_hora'),'D','Higiene bucal','Realizada','9B59B6']);
+  meals.forEach(m=>{
+    if(m.hora&&m.alimentos!=='--')events.push([m.hora,'C',m.comida,m.alimentos+' / '+m.pct,'E67E22']);
+  });
+  paseos.forEach(p=>{
+    if(p.desde)events.push([p.desde,'P','Paseo / Caminata',(p.lugar||'?')+(p.hasta?' hasta '+p.hasta:''),'27AE60']);
+  });
+  if(v('depo')==='Si'&&vOpt('depo_hora'))events.push([v('depo_hora'),'D','Deposicion',v('depo_cant')+' / '+v('depo_cons'),'C0392B']);
+  visitas.forEach(vi=>{if(vi.hora)events.push([vi.hora,'Vi','Visita',vi.nombre+' ('+vi.dur+')','8E44AD']);});
+  events.push(['19:00','V','Fin de turno','Signos vitales finales registrados','1F4E79']);
+  events.sort((a,b)=>{
+    if(a[0]==='08:00')return-1;if(b[0]==='08:00')return 1;
+    if(a[0]==='19:00')return 1;if(b[0]==='19:00')return-1;
+    return(a[0]||'').localeCompare(b[0]||'');
+  });
+
+  // headers
+  tc('1a1a1a');doc.setFontSize(9.5);doc.setFont('helvetica','bold');
+  doc.text('LINEA DE TIEMPO DEL DIA',tlX,y);
+  doc.text('SIGNOS VITALES',svX,y);
+  y+=5;
+  dc('DDDDDD');doc.setLineWidth(0.4);
+  doc.line(tlX,y,tlX+tlW-2,y);
+  doc.line(svX,y,svX+svW,y);
+  doc.setLineWidth(0.2);y+=5;
+
+  const startY=y;
+  let tlY=startY,svY=startY;
+
+  // draw timeline
+  events.forEach(([time,icon,label,sub,color])=>{
+    if(tlY>270){return;}
+    const cc=color||'1F4E79';
+    fl(cc);doc.circle(tlX+4,tlY+4,3.2,'F');
+    tc('FFFFFF');doc.setFontSize(6.5);doc.setFont('helvetica','bold');
+    doc.text(icon.substring(0,1),tlX+4,tlY+5.8,{align:'center'});
+    // line
+    dc('DDDDDD');doc.setLineWidth(0.3);
+    doc.line(tlX+4,tlY+7.5,tlX+4,tlY+13);
+    doc.setLineWidth(0.2);
+    tc('1F4E79');doc.setFontSize(7);doc.setFont('helvetica','bold');
+    if(time)doc.text(time,tlX+9,tlY+5);
+    tc('1a1a1a');doc.setFontSize(7.5);doc.setFont('helvetica','bold');
+    doc.text(label,tlX+30,tlY+5,{maxWidth:tlW-32});
+    tc('777777');doc.setFontSize(6.5);doc.setFont('helvetica','normal');
+    if(sub)doc.text(sub,tlX+30,tlY+9.5,{maxWidth:tlW-32});
+    tlY+=sub?13:10;
+  });
+
+  // draw SV table
+  // header row
+  fl('1F4E79');doc.rect(svX,svY,svW,6,'F');
+  tc('FFFFFF');doc.setFontSize(6);doc.setFont('helvetica','bold');
+  const sc=svW/4;
+  doc.text('MEDICION',svX+2,svY+4.3);
+  doc.text('INICIO 08:00',svX+sc+2,svY+4.3);
+  doc.text('FIN 19:00',svX+sc*2+2,svY+4.3);
+  doc.text('ESTADO',svX+sc*3+2,svY+4.3);
+  svY+=7;
+
+  const svRows=[
+    ['Temperatura',tmp1+' C',tmp2+' C',stsTemp(tmp1)===stsTemp(tmp2)?stsTemp(tmp1):stsTemp(tmp2)],
+    ['Frec. cardiaca',fc1+' lpm',fc2+' lpm',stsFc(fc1)===stsFc(fc2)?stsFc(fc1):stsFc(fc2)],
+    ['Presion arterial',pa1,pa2,'info'],
+    ['Saturacion O2',sat1+'%',sat2+'%',stsSat(sat1)===stsSat(sat2)?stsSat(sat1):stsSat(sat2)],
+  ];
+  svRows.forEach((r,i)=>{
+    fl(i%2===0?'F8FBFF':'FFFFFF');doc.rect(svX,svY,svW,7,'F');
+    dc('E8E8E8');doc.setLineWidth(0.2);doc.rect(svX,svY,svW,7);
+    tc('444444');doc.setFontSize(7);doc.setFont('helvetica','bold');doc.text(r[0],svX+2,svY+4.8);
+    tc('1a1a1a');doc.setFontSize(7.5);doc.setFont('helvetica','normal');
+    doc.text(r[1],svX+sc+2,svY+4.8);
+    doc.text(r[2],svX+sc*2+2,svY+4.8);
+    const st=r[3];
+    if(st&&st!=='info'){
+      fl(C[st]);doc.roundedRect(svX+sc*3+2,svY+1.5,sc-6,4,1,1,'F');
+      tc('FFFFFF');doc.setFontSize(6);doc.setFont('helvetica','bold');
+      doc.text(LABEL[st],svX+sc*3+2+(sc-6)/2,svY+4.3,{align:'center'});
+    }
+    svY+=8;
+  });
+  svY+=3;
+  // Estado general + obs
+  fl('EBF3FB');doc.rect(svX,svY,svW,7,'F');
+  tc('1F4E79');doc.setFontSize(6);doc.setFont('helvetica','bold');doc.text('Estado general',svX+2,svY+3.5);
+  tc('1a1a1a');doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.text(estado,svX+2,svY+7,{maxWidth:svW-4});
+  svY+=10;
+  if(vOpt('sv_obs')){
+    fl('EBF3FB');doc.rect(svX,svY,svW,7,'F');
+    tc('1F4E79');doc.setFontSize(6);doc.setFont('helvetica','bold');doc.text('Observaciones',svX+2,svY+3.5);
+    tc('1a1a1a');doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.text(v('sv_obs'),svX+2,svY+7,{maxWidth:svW-4});
+    svY+=10;
+  }
+
+  y=Math.max(tlY,svY)+6;
+
+  // ── MEDICACION + NUTRICION (lado a lado) ──
+  const medW=cw*0.48,nutW=cw*0.48;
+  const medX=mg,nutX=mg+medW+cw*0.04;
+
+  if(y>220){doc.addPage();y=12;stripHdr();}
+
+  tc('1a1a1a');doc.setFontSize(9.5);doc.setFont('helvetica','bold');
+  doc.text('MEDICACION ADMINISTRADA',medX,y);
+  doc.text('NUTRICION E HIDRATACION',nutX,y);
+  y+=5;
+  dc('DDDDDD');doc.setLineWidth(0.4);
+  doc.line(medX,y,medX+medW,y);
+  doc.line(nutX,y,nutX+nutW,y);
+  doc.setLineWidth(0.2);y+=4;
+
+  let medY=y,nutY=y;
+  const gcols={'Antes desayuno':'D4874A','Desayuno':'C0392B','Almuerzo':'3A6DB5','Despues terapia':'9B8A2A','Cena':'2E7D32','Condicional':'7B3FA0','Adicional':'555555'};
+
+  Object.entries(medGrupos).forEach(([mom,meds])=>{
+    if(!meds.length)return;
+    if(medY>268)return;
+    const[r,g,b]=h2r(gcols[mom]||'555555');doc.setFillColor(r,g,b);
+    doc.roundedRect(medX,medY,medW,5,1,1,'F');
+    tc('FFFFFF');doc.setFontSize(6.5);doc.setFont('helvetica','bold');doc.text(mom.toUpperCase(),medX+2,medY+3.5);
+    medY+=6;
+    meds.forEach(med=>{
+      if(medY>268)return;
+      fl(med.checked?'E8F8F0':'FFF0F0');doc.rect(medX,medY,medW,6,'F');
+      // check or X
+      if(med.checked){
+        fl('27AE60');doc.circle(medX+3.5,medY+3,3,'F');
+        tc('FFFFFF');doc.setFontSize(8);doc.setFont('helvetica','bold');doc.text('v',medX+1.8,medY+4.5);
+      } else {
+        fl('FDEDEC');dc('C0392B');const[rx,gx,bx]=h2r('C0392B');doc.setDrawColor(rx,gx,bx);doc.setLineWidth(0.5);
+        doc.circle(medX+3.5,medY+3,3,'FD');doc.setLineWidth(0.2);
+        tc('C0392B');doc.setFontSize(8);doc.setFont('helvetica','bold');doc.text('x',medX+1.8,medY+4.5);
+      }
+      tc(med.checked?'155724':'7B241C');doc.setFontSize(7.5);doc.setFont('helvetica',med.checked?'normal':'normal');
+      doc.text(med.nombre,medX+8,medY+4,{maxWidth:medW-30});
+      tc('888888');doc.setFontSize(6.5);doc.setFont('helvetica','normal');
+      if(med.dosis)doc.text(med.dosis,medX+medW-doc.getTextWidth(med.dosis)-1,medY+4);
+      medY+=7;
+    });
+    medY+=1;
+  });
+  if(vOpt('med_obs')){
+    fl('FFF9E6');doc.rect(medX,medY,medW,10,'F');
+    tc('9B8A2A');doc.setFontSize(6);doc.setFont('helvetica','bold');doc.text('Observaciones',medX+2,medY+4);
+    tc('1a1a1a');doc.setFontSize(7);doc.setFont('helvetica','normal');doc.text(v('med_obs'),medX+2,medY+8,{maxWidth:medW-4});
+    medY+=12;
+  }
+
+  // NUTRICION side
+  // meal table header
+  fl('1F4E79');doc.rect(nutX,nutY,nutW,6,'F');
+  tc('FFFFFF');doc.setFontSize(6);doc.setFont('helvetica','bold');
+  const nc=[nutW*0.2,nutW*0.13,nutW*0.35,nutW*0.15,nutW*0.17];
+  let nx=nutX;
+  ['Comida','Hora','Alimentos','% Cons.','Obs.'].forEach((h,i)=>{doc.text(h,nx+1,nutY+4.3);nx+=nc[i];});
+  nutY+=7;
+  const mbg=['FFF3E0','EBF3FB','E8F5E9','F3E5F5'];
+  meals.forEach((m,i)=>{
+    if(nutY>268)return;
+    const[r,g,b]=h2r(mbg[i]);doc.setFillColor(r,g,b);doc.rect(nutX,nutY,nutW,7,'F');
+    fl('D6E4F0');doc.rect(nutX,nutY,nc[0],7,'F');
+    tc('1F4E79');doc.setFontSize(6.5);doc.setFont('helvetica','bold');doc.text(m.comida,nutX+1,nutY+4.8);
+    nx=nutX+nc[0];tc('1a1a1a');doc.setFontSize(7);doc.setFont('helvetica','normal');
+    doc.text(m.hora||'--',nx+1,nutY+4.8);nx+=nc[1];
+    doc.text(m.alimentos,nx+1,nutY+4.8,{maxWidth:nc[2]-2});nx+=nc[2];
+    doc.text(m.pct,nx+1,nutY+4.8);nx+=nc[3];
+    doc.text(m.obs,nx+1,nutY+4.8,{maxWidth:nc[4]-2});
+    nutY+=8;
+  });
+  nutY+=3;
+  // liquidos
+  fl('EBF3FB');doc.rect(nutX,nutY,nutW/2-1,12,'F');
+  tc('2E75B6');doc.setFontSize(6);doc.setFont('helvetica','bold');doc.text('LIQUIDOS TOTALES',nutX+2,nutY+4);
+  tc('1a1a1a');doc.setFontSize(10);doc.setFont('helvetica','bold');doc.text(liq,nutX+2,nutY+10);
+  fl('EBF3FB');doc.rect(nutX+nutW/2+1,nutY,nutW/2-1,12,'F');
+  tc('2E75B6');doc.setFontSize(6);doc.setFont('helvetica','bold');doc.text('TIPOS DE LIQUIDO',nutX+nutW/2+3,nutY+4);
+  tc('1a1a1a');doc.setFontSize(7);doc.setFont('helvetica','normal');doc.text(chips,nutX+nutW/2+3,nutY+9,{maxWidth:nutW/2-4});
+  nutY+=15;
+
+  y=Math.max(medY,nutY)+6;
+
+  // ════════════════════════════════════════
+  // PAGINA 2+ — DETALLE
+  // ════════════════════════════════════════
+  doc.addPage();y=12;stripHdr();
+
+  secHdr('1','DATOS DEL TURNO');
+  pair('Fecha',fecha,'Tecnicas',t1+(t2!=='--'?' & '+t2:''));
+
+  secHdr('2','SIGNOS VITALES');
+  subLbl('Al inicio del turno - 08:00');
+  pair('Temperatura',tmp1+' C','Frec. cardiaca',fc1+' lpm');
+  pair('Presion arterial',pa1+' mmHg','Saturacion O2',sat1+'%');
+  subLbl('Al final del turno - 19:00');
+  pair('Temperatura',tmp2+' C','Frec. cardiaca',fc2+' lpm');
+  pair('Presion arterial',pa2+' mmHg','Saturacion O2',sat2+'%');
+  full('Estado general',estado);
+  if(vOpt('sv_obs'))full('Observaciones',v('sv_obs'),true);
+
+  secHdr('3','MEDICACION ADMINISTRADA');
+  Object.entries(medGrupos).forEach(([mom,meds])=>{
+    if(!meds.length)return;
+    checkY(10+meds.length*7);
+    const[r,g,b]=h2r(gcols[mom]||'555555');doc.setFillColor(r,g,b);
+    doc.roundedRect(mg,y,cw,5,1,1,'F');
+    tc('FFFFFF');doc.setFontSize(7);doc.setFont('helvetica','bold');doc.text(mom.toUpperCase(),mg+3,y+3.5);y+=6;
+    meds.forEach(med=>{
+      checkY(7);fl(med.checked?'E8F8F0':'FFF0F0');doc.rect(mg,y,cw,7,'F');
+      if(med.checked){fl('27AE60');doc.circle(mg+3.5,y+3.5,3,'F');tc('FFFFFF');doc.setFontSize(9);doc.setFont('helvetica','bold');doc.text('v',mg+1.8,y+5);}
+      else{fl('FDEDEC');dc('C0392B');const[rx,gx,bx]=h2r('C0392B');doc.setDrawColor(rx,gx,bx);doc.setLineWidth(0.5);doc.circle(mg+3.5,y+3.5,3,'FD');doc.setLineWidth(0.2);tc('C0392B');doc.setFontSize(9);doc.setFont('helvetica','bold');doc.text('x',mg+1.8,y+5);}
+      tc(med.checked?'155724':'7B241C');doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text(med.nombre,mg+9,y+4.8);
+      tc('777777');doc.setFontSize(7.5);doc.setFont('helvetica','normal');if(med.dosis)doc.text(med.dosis,mg+cw-doc.getTextWidth(med.dosis)-2,y+4.8);
+      y+=7;doc.setLineWidth(0.2);
+    });y+=2;
+  });
+  if(vOpt('med_obs'))full('Observaciones',v('med_obs'),true);
+
+  secHdr('4','NUTRICION E HIDRATACION');
+  checkY(10+meals.length*9);
+  fl('1F4E79');doc.rect(mg,y,cw,6,'F');
+  tc('FFFFFF');doc.setFontSize(6.5);doc.setFont('helvetica','bold');
+  const mc2=[cw*0.18,cw*0.12,cw*0.38,cw*0.14,cw*0.18];let cx=mg;
+  ['Comida','Hora','Alimentos','% Cons.','Observaciones'].forEach((h,i)=>{doc.text(h,cx+1,y+4.3);cx+=mc2[i];});y+=7;
+  meals.forEach((m,i)=>{
+    checkY(9);const[r,g,b]=h2r(mbg[i]);doc.setFillColor(r,g,b);doc.rect(mg,y,cw,8,'F');
+    fl('D6E4F0');doc.rect(mg,y,mc2[0],8,'F');
+    tc('1F4E79');doc.setFontSize(6.5);doc.setFont('helvetica','bold');doc.text(m.comida,mg+1,y+5.3);
+    cx=mg+mc2[0];tc('1a1a1a');doc.setFontSize(8);doc.setFont('helvetica','normal');
+    doc.text(m.hora||'--',cx+1,y+5.3);cx+=mc2[1];
+    doc.text(m.alimentos,cx+1,y+5.3,{maxWidth:mc2[2]-2});cx+=mc2[2];
+    doc.text(m.pct,cx+1,y+5.3);cx+=mc2[3];
+    doc.text(m.obs,cx+1,y+5.3,{maxWidth:mc2[4]-2});y+=9;
+  });y+=2;
+  pair('Liquidos totales',liqLabel(liq),'Tipos de liquido',chips);
+  if(vOpt('nutricion_obs'))full('Observaciones',v('nutricion_obs'),true);
+
+  secHdr('5','HIGIENE Y CUIDADO FISICO');
+  pair('Bano realizado',v('bano'),'Tipo',v('bano_tipo'));
+  pair('Hora del bano',v('bano_hora'),'Colaboracion',v('bano_colab'));
+  if(vOpt('bano_obs'))full('Observaciones',v('bano_obs'),true);
+  pair('Higiene bucal',v('bucal'),'Hora',v('bucal_hora'));
+  subLbl('Deposicion');
+  pair('Realizo deposicion',v('depo'),'Hora',v('depo_hora'));
+  pair('Cantidad',v('depo_cant'),'Consistencia',v('depo_cons'));
+  if(vOpt('depo_obs'))full('Observaciones',v('depo_obs'),true);
+  subLbl('Micciones');
+  pair('Cambios de panal',v('mictions'),'Presencia de orina',v('orina'));
+  pair('Color orina',v('orina_color'),'Ultimo cambio',v('ultimo_cambio'));
+  if(vOpt('orina_obs'))full('Observaciones',v('orina_obs'),true);
+
+  secHdr('6','ESTADO DE ANIMO GENERAL');
+  full('Estado de animo',animo);
+  if(vOpt('animo_obs'))full('Observaciones',v('animo_obs'),true);
+
+  secHdr('7','ACTIVIDAD FISICA');
+  if(paseos.length){paseos.forEach(p=>{checkY(8);fl('EBF3FB');doc.rect(mg,y,cw,7,'F');tc('1a1a1a');doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text('De '+(p.desde||'?')+' a '+(p.hasta||'?')+'  -  '+(p.lugar||'?'),mg+3,y+4.8);y+=8;});y+=2;}
+  else full('Paseos','Sin paseos registrados');
+  pair('Calidad de la marcha',v('marcha'),' ',' ');
+  if(vOpt('activ_obs'))full('Observaciones',v('activ_obs'),true);
+
+  if(visitas.length){
+    secHdr('8','VISITAS Y EVENTOS');
+    fl('1F4E79');doc.rect(mg,y,cw,6,'F');tc('FFFFFF');doc.setFontSize(6.5);doc.setFont('helvetica','bold');
+    doc.text('Hora',mg+2,y+4.3);doc.text('Visitante',mg+20,y+4.3);doc.text('Duracion',mg+75,y+4.3);doc.text('Respuesta',mg+108,y+4.3);y+=7;
+    visitas.forEach((vi,i)=>{checkY(8);fl(i%2===0?'F5F8FC':'FFFFFF');doc.rect(mg,y,cw,7,'F');tc('1a1a1a');doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text(vi.hora,mg+2,y+4.8);doc.text(vi.nombre,mg+20,y+4.8,{maxWidth:53});doc.text(vi.dur,mg+75,y+4.8,{maxWidth:31});doc.text(vi.resp,mg+108,y+4.8,{maxWidth:cw-96});y+=8;});y+=2;
+  }
+
+  secHdr('9','OBSERVACIONES GENERALES');
+  full('',obsGen,true);
+
+  // footer
+  const pc=doc.getNumberOfPages();
+  for(let i=1;i<=pc;i++){
+    doc.setPage(i);fl('1F4E79');doc.rect(0,288,W,9,'F');
+    tc('FFFFFF');doc.setFontSize(6.5);doc.setFont('helvetica','normal');
+    doc.text('Sra. Ursula | Turno Dia '+fecha+' | '+t1+(t2!=='--'?' & '+t2:''),mg,293);
+    doc.text('Pag '+i+' / '+pc,W-mg,293,{align:'right'});
+  }
+  doc.save('TurnoDia_'+fDateFile(fechaVal)+'.pdf');
+  showToast('Reporte guardado correctamente');
+}
+</script>
+</body>
+</html>
