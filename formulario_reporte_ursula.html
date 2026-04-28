@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reporte de Turno - Sra. Ursula</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f4f6f9;color:#222;font-size:15px}
+.header{background:#1F4E79;color:#fff;padding:14px 16px;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:16px;font-weight:700}
+.header p{font-size:12px;opacity:0.8;margin-top:2px}
+.gen-btn-top{background:#27ae60;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;margin-left:12px}
+.wrap{padding:12px 12px 100px}
+.sec{margin-bottom:16px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+.sec-title{background:#2E75B6;color:#fff;padding:8px 14px;font-size:13px;font-weight:700;letter-spacing:0.03em}
+.sec-body{padding:12px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
+.field-row.one{grid-template-columns:1fr}
+.field{display:flex;flex-direction:column;gap:3px}
+label{font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.03em}
+input[type=text],input[type=date],input[type=time],input[type=number],select,textarea{width:100%;font-size:14px;padding:8px 10px;border:1.5px solid #ddd;border-radius:7px;background:#fff;color:#222;font-family:Arial,sans-serif;-webkit-appearance:none}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#2E75B6}
+textarea{resize:vertical;min-height:64px;line-height:1.5}
+.sub{font-size:12px;font-weight:700;color:#2E75B6;margin:12px 0 6px;text-transform:uppercase;letter-spacing:0.04em}
+.etable{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:6px}
+.etable th{background:#1F4E79;color:#fff;padding:6px 5px;text-align:left;font-weight:700;font-size:11px}
+.etable td{border:1px solid #e0e0e0;padding:2px 3px}
+.etable td input,.etable td select{border:none;background:transparent;font-size:12px;padding:4px 4px;width:100%;min-width:0;font-family:Arial,sans-serif}
+.meal-lbl{background:#D6E4F0;font-weight:700;font-size:12px;color:#1F4E79;padding:5px 6px}
+.btm-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #ddd;padding:10px 12px;display:flex;gap:8px;z-index:100}
+.btn-gen{flex:1;background:#27ae60;color:#fff;border:none;padding:12px;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer}
+.btn-clear{background:#fff;color:#e74c3c;border:1.5px solid #e74c3c;padding:12px 16px;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer}
+.preview-wrap{display:none;background:#f8f9fa;border:1.5px solid #2E75B6;border-radius:10px;padding:14px;margin-top:14px;font-size:12px;line-height:1.8;white-space:pre-wrap;color:#222;font-family:monospace}
+.preview-wrap.show{display:block}
+.copy-btn{width:100%;background:#2E75B6;color:#fff;border:none;padding:11px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px}
+.copy-ok{font-size:13px;color:#27ae60;text-align:center;margin-top:8px;font-weight:700;display:none}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>Reporte de Turno</h1>
+    <p>Sra. Ursula</p>
+  </div>
+  <button class="gen-btn-top" onclick="generar()">Generar reporte</button>
+</div>
+
+<div class="wrap">
+
+<!-- 0. DATOS DEL TURNO -->
+<div class="sec">
+  <div class="sec-title">DATOS DEL TURNO</div>
+  <div class="sec-body">
+    <div class="field-row one"><div class="field"><label>Tecnica responsable</label><input type="text" id="tecnica" placeholder="Nombre completo"></div></div>
+    <div class="field-row">
+      <div class="field"><label>Turno</label>
+        <select id="turno">
+          <option value="">Seleccionar...</option>
+          <option>Manana (07:00 - 19:00)</option>
+          <option>Noche (19:00 - 07:00)</option>
+        </select>
+      </div>
+      <div class="field"><label>Fecha</label><input type="date" id="fecha"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Hora inicio</label><input type="time" id="hora_inicio"></div>
+      <div class="field"><label>Hora entrega</label><input type="time" id="hora_entrega"></div>
+    </div>
+    <div class="field-row one"><div class="field"><label>Tecnica que recibe el turno</label><input type="text" id="recibe" placeholder="Nombre"></div></div>
+  </div>
+</div>
+
+<!-- 1. SIGNOS VITALES -->
+<div class="sec">
+  <div class="sec-title">1. SIGNOS VITALES</div>
+  <div class="sec-body">
+    <div class="sub">Al inicio del turno</div>
+    <div class="field-row">
+      <div class="field"><label>Temperatura (C)</label><input type="text" id="temp1" placeholder="Ej: 36.5"></div>
+      <div class="field"><label>Frec. cardiaca (lpm)</label><input type="text" id="fc1" placeholder="Ej: 78"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Presion arterial (mmHg)</label><input type="text" id="pa1" placeholder="Ej: 120/80"></div>
+      <div class="field"><label>Saturacion O2 (%)</label><input type="text" id="sat1" placeholder="Ej: 97"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Hora de toma</label><input type="time" id="hora_sv1"></div>
+      <div class="field"><label>Estado general</label>
+        <select id="estado1">
+          <option value="">Seleccionar...</option>
+          <option>Tranquila</option><option>Ansiosa</option><option>Agitada</option>
+          <option>Llorosa</option><option>Agresiva</option><option>Somnolenta</option>
+        </select>
+      </div>
+    </div>
+    <div class="sub">Al final del turno</div>
+    <div class="field-row">
+      <div class="field"><label>Temperatura (C)</label><input type="text" id="temp2" placeholder="Ej: 36.5"></div>
+      <div class="field"><label>Frec. cardiaca (lpm)</label><input type="text" id="fc2" placeholder="Ej: 78"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Presion arterial (mmHg)</label><input type="text" id="pa2" placeholder="Ej: 120/80"></div>
+      <div class="field"><label>Saturacion O2 (%)</label><input type="text" id="sat2" placeholder="Ej: 97"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. MEDICACION -->
+<div class="sec">
+  <div class="sec-title">2. MEDICACION ADMINISTRADA</div>
+  <div class="sec-body">
+    <table class="etable">
+      <thead><tr><th>Medicamento</th><th>Dosis</th><th>Via</th><th>Hora</th><th>Tolerancia</th><th>Obs.</th></tr></thead>
+      <tbody id="med-body">
+        <tr><td><input type="text" class="mn"></td><td><input type="text" class="md"></td><td><input type="text" class="mv" placeholder="oral"></td><td><input type="time" class="mh"></td><td><select class="mt"><option>Buena</option><option>Con dificultad</option><option>Rechazo</option></select></td><td><input type="text" class="mo"></td></tr>
+        <tr><td><input type="text" class="mn"></td><td><input type="text" class="md"></td><td><input type="text" class="mv" placeholder="oral"></td><td><input type="time" class="mh"></td><td><select class="mt"><option>Buena</option><option>Con dificultad</option><option>Rechazo</option></select></td><td><input type="text" class="mo"></td></tr>
+        <tr><td><input type="text" class="mn"></td><td><input type="text" class="md"></td><td><input type="text" class="mv" placeholder="oral"></td><td><input type="time" class="mh"></td><td><select class="mt"><option>Buena</option><option>Con dificultad</option><option>Rechazo</option></select></td><td><input type="text" class="mo"></td></tr>
+        <tr><td><input type="text" class="mn"></td><td><input type="text" class="md"></td><td><input type="text" class="mv" placeholder="oral"></td><td><input type="time" class="mh"></td><td><select class="mt"><option>Buena</option><option>Con dificultad</option><option>Rechazo</option></select></td><td><input type="text" class="mo"></td></tr>
+        <tr><td><input type="text" class="mn"></td><td><input type="text" class="md"></td><td><input type="text" class="mv" placeholder="oral"></td><td><input type="time" class="mh"></td><td><select class="mt"><option>Buena</option><option>Con dificultad</option><option>Rechazo</option></select></td><td><input type="text" class="mo"></td></tr>
+      </tbody>
+    </table>
+    <div class="field-row one"><div class="field"><label>Medicacion PRN (si aplica) — motivo, dosis, hora y respuesta</label><textarea id="med_prn" placeholder="Ej: Clonazepam 1.5mg oral a las 21:00 — paciente muy agitada — logro dormirse a las 22:15"></textarea></div></div>
+  </div>
+</div>
+
+<!-- 3. NUTRICION -->
+<div class="sec">
+  <div class="sec-title">3. NUTRICION E HIDRATACION</div>
+  <div class="sec-body">
+    <table class="etable">
+      <thead><tr><th>Comida</th><th>Alimentos</th><th>% consumido</th><th>Posicion</th><th>Observaciones</th></tr></thead>
+      <tbody>
+        <tr><td class="meal-lbl">Desayuno</td><td><input type="text" class="mal"></td><td><input type="text" class="mpc" placeholder="75%"></td><td><input type="text" class="mpos" placeholder="de pie"></td><td><input type="text" class="mob"></td></tr>
+        <tr><td class="meal-lbl">Almuerzo</td><td><input type="text" class="mal"></td><td><input type="text" class="mpc" placeholder="75%"></td><td><input type="text" class="mpos" placeholder="de pie"></td><td><input type="text" class="mob"></td></tr>
+        <tr><td class="meal-lbl">Cena</td><td><input type="text" class="mal"></td><td><input type="text" class="mpc" placeholder="75%"></td><td><input type="text" class="mpos" placeholder="de pie"></td><td><input type="text" class="mob"></td></tr>
+        <tr><td class="meal-lbl">Merienda</td><td><input type="text" class="mal"></td><td><input type="text" class="mpc" placeholder="—"></td><td><input type="text" class="mpos"></td><td><input type="text" class="mob"></td></tr>
+      </tbody>
+    </table>
+    <div class="field-row">
+      <div class="field"><label>Liquidos totales aprox. (ml)</label><input type="text" id="liquidos" placeholder="Ej: 800 ml"></div>
+      <div class="field"><label>Tipos de liquido</label><input type="text" id="tipo_liquido" placeholder="agua, infusion, caldo"></div>
+    </div>
+    <div class="field-row one"><div class="field"><label>Observaciones</label><textarea id="nutricion_obs"></textarea></div></div>
+  </div>
+</div>
+
+<!-- 4. HIGIENE -->
+<div class="sec">
+  <div class="sec-title">4. HIGIENE Y CUIDADO FISICO</div>
+  <div class="sec-body">
+    <div class="field-row">
+      <div class="field"><label>Bano realizado</label><select id="bano"><option value="">Seleccionar...</option><option>Si</option><option>No</option></select></div>
+      <div class="field"><label>Tipo</label><select id="bano_tipo"><option value="">Seleccionar...</option><option>Ducha</option><option>Esponja/cama</option></select></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Hora del bano</label><input type="time" id="bano_hora"></div>
+      <div class="field"><label>Colaboracion</label><select id="bano_colab"><option value="">Seleccionar...</option><option>Si, colaboro</option><option>Parcialmente</option><option>No colaboro</option></select></div>
+    </div>
+    <div class="field-row one"><div class="field"><label>Respuesta emocional al bano</label><textarea id="bano_resp" placeholder="Ej: se tranquilizo durante el bano..."></textarea></div></div>
+    <div class="field-row">
+      <div class="field"><label>Higiene bucal</label><select id="bucal"><option value="">Seleccionar...</option><option>Si</option><option>No</option></select></div>
+      <div class="field"><label>Hora</label><input type="time" id="bucal_hora"></div>
+    </div>
+
+    <div class="sub">Deposicion</div>
+    <div class="field-row">
+      <div class="field"><label>Realizo deposicion</label><select id="depo"><option value="">Seleccionar...</option><option>Si</option><option>No</option></select></div>
+      <div class="field"><label>Hora</label><input type="time" id="depo_hora"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Cantidad</label><input type="text" id="depo_cant" placeholder="Abundante / escasa"></div>
+      <div class="field"><label>Consistencia</label><input type="text" id="depo_cons" placeholder="Normal / blanda / dura"></div>
+    </div>
+    <div class="field-row one"><div class="field"><label>Observaciones</label><textarea id="depo_obs" placeholder="Ej: hizo en panal, no quiso ir al inodoro..."></textarea></div></div>
+
+    <div class="sub">Micciones</div>
+    <div class="field-row">
+      <div class="field"><label>N de cambios de panal</label><input type="number" id="mictions" min="0" placeholder="Ej: 4"></div>
+      <div class="field"><label>Presencia de orina</label><select id="orina"><option value="">Seleccionar...</option><option>Si, en todos los cambios</option><option>En algunos cambios</option><option>No se detecto orina</option></select></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Caracteristicas</label><input type="text" id="orina_caract" placeholder="Color, olor normal..."></div>
+      <div class="field"><label>Hora ultimo cambio</label><input type="time" id="ultimo_cambio"></div>
+    </div>
+    <div class="field-row one"><div class="field"><label>Observaciones micciones</label><textarea id="orina_obs"></textarea></div></div>
+
+    <div class="sub">Integridad de la piel</div>
+    <div class="field-row">
+      <div class="field"><label>Estado de la piel</label><select id="piel"><option value="">Seleccionar...</option><option>Sin cambios</option><option>Hallazgo nuevo</option></select></div>
+      <div class="field"><label>Hidratacion aplicada (zona)</label><input type="text" id="hidrat" placeholder="pies, manos..."></div>
+    </div>
+    <div class="field-row one"><div class="field"><label>Descripcion del hallazgo (si aplica)</label><textarea id="piel_desc" placeholder="Ubicacion, tamano, aspecto..."></textarea></div></div>
+  </div>
+</div>
+
+<!-- 5. CONDUCTUAL -->
+<div class="sec">
+  <div class="sec-title">5. ESTADO CONDUCTUAL</div>
+  <div class="sec-body">
+    <div class="field-row">
+      <div class="field"><label>Estado de animo general</label>
+        <select id="animo">
+          <option value="">Seleccionar...</option>
+          <option>Tranquila y colaboradora</option>
+          <option>Tranquila con momentos de ansiedad</option>
+          <option>Ansiosa / inquieta</option>
+          <option>Llorosa</option>
+          <option>Agitada (leve)</option>
+          <option>Agitada (moderada)</option>
+          <option>Agitada (severa)</option>
+          <option>Agresiva</option>
+        </select>
+      </div>
+      <div class="field"><label>Alucinaciones / delirios</label>
+        <select id="alucin"><option value="">Seleccionar...</option><option>No se observaron</option><option>Si</option></select>
+      </div>
+    </div>
+    <div class="field-row one"><div class="field"><label>Descripcion de alucinaciones (si aplica)</label><textarea id="alucin_desc" placeholder="Que veia o decia, como reacciono..."></textarea></div></div>
+
+    <div class="sub">Episodios de agitacion o llanto</div>
+    <table class="etable">
+      <thead><tr><th>H.inicio</th><th>H.fin</th><th>Intensidad</th><th>Desencadenante</th><th>Intervencion</th><th>Respuesta</th></tr></thead>
+      <tbody id="agit-body">
+        <tr><td><input type="time"></td><td><input type="time"></td><td><select><option value="">—</option><option>Leve</option><option>Moderada</option><option>Severa</option></select></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+        <tr><td><input type="time"></td><td><input type="time"></td><td><select><option value="">—</option><option>Leve</option><option>Moderada</option><option>Severa</option></select></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+        <tr><td><input type="time"></td><td><input type="time"></td><td><select><option value="">—</option><option>Leve</option><option>Moderada</option><option>Severa</option></select></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+      </tbody>
+    </table>
+
+    <div class="sub">Episodios de agresividad</div>
+    <table class="etable">
+      <thead><tr><th>Hora</th><th>Tipo</th><th>Dirigido a</th><th>Intervencion</th><th>Respuesta</th></tr></thead>
+      <tbody id="agres-body">
+        <tr><td><input type="time"></td><td><select><option value="">—</option><option>Verbal</option><option>Fisica</option><option>Ambas</option></select></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+        <tr><td><input type="time"></td><td><select><option value="">—</option><option>Verbal</option><option>Fisica</option><option>Ambas</option></select></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 6. ACTIVIDAD -->
+<div class="sec">
+  <div class="sec-title">6. ACTIVIDAD FISICA Y MOVILIDAD</div>
+  <div class="sec-body">
+    <div class="field-row">
+      <div class="field"><label>Tiempo deambulando (horas)</label><input type="text" id="deambul" placeholder="Ej: 5 horas"></div>
+      <div class="field"><label>Zonas</label><input type="text" id="zonas" placeholder="casa, parque, jardin"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Tiempo en cama/reposo</label><input type="text" id="reposo" placeholder="Ej: 2 horas"></div>
+      <div class="field"><label>Calidad de la marcha</label>
+        <select id="marcha"><option value="">Seleccionar...</option><option>Normal</option><option>Lenta</option><option>Inestable</option><option>Muy lenta / con apoyo</option></select>
+      </div>
+    </div>
+    <div class="sub">Terapia fisica (si aplica)</div>
+    <div class="field-row">
+      <div class="field"><label>Terapeuta</label><input type="text" id="terapeuta" placeholder="Ej: Lic. Miluska"></div>
+      <div class="field"><label>Duracion</label><input type="text" id="terapia_dur" placeholder="Ej: 45 min"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Colaboracion</label>
+        <select id="terapia_colab"><option value="">—</option><option>Buena colaboracion</option><option>Colaboracion parcial</option><option>No colaboro</option><option>No aplica este turno</option></select>
+      </div>
+      <div class="field"><label>Obs. de la terapeuta</label><input type="text" id="terapia_obs"></div>
+    </div>
+    <div class="field-row one"><div class="field"><label>Ejercicios y respuesta</label><textarea id="ejercicios"></textarea></div></div>
+  </div>
+</div>
+
+<!-- 7. SUENO -->
+<div class="sec">
+  <div class="sec-title">7. SUENO</div>
+  <div class="sec-body">
+    <div class="field-row">
+      <div class="field"><label>Hora de acostarse</label><input type="time" id="s_acostar"></div>
+      <div class="field"><label>Hora de dormirse</label><input type="time" id="s_dormir"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Conciliacion</label>
+        <select id="s_concilia"><option value="">Seleccionar...</option><option>Espontanea</option><option>Con dificultad, sin medicacion</option><option>Requirio medicacion PRN</option></select>
+      </div>
+      <div class="field"><label>Total horas de sueno</label><input type="text" id="s_horas" placeholder="Ej: 7.5 horas"></div>
+    </div>
+    <div class="sub">Despertares</div>
+    <table class="etable">
+      <thead><tr><th>Hora</th><th>Duracion</th><th>Motivo</th><th>Intervencion</th><th>Resultado</th></tr></thead>
+      <tbody id="sue-body">
+        <tr><td><input type="time"></td><td><input type="text" placeholder="20 min"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+        <tr><td><input type="time"></td><td><input type="text" placeholder="20 min"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+      </tbody>
+    </table>
+    <div class="field-row">
+      <div class="field"><label>Hora de despertar</label><input type="time" id="s_despertar"></div>
+      <div class="field"><label>Estado al despertar</label>
+        <select id="s_estado"><option value="">Seleccionar...</option><option>Tranquila</option><option>Llorosa / angustiada</option><option>Agitada</option><option>Somnolenta</option></select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8. VISITAS -->
+<div class="sec">
+  <div class="sec-title">8. VISITAS Y EVENTOS</div>
+  <div class="sec-body">
+    <table class="etable">
+      <thead><tr><th>Hora</th><th>Visitante / evento</th><th>Duracion</th><th>Respuesta de Ursula</th></tr></thead>
+      <tbody id="vis-body">
+        <tr><td><input type="time"></td><td><input type="text"></td><td><input type="text" placeholder="1 hora"></td><td><input type="text"></td></tr>
+        <tr><td><input type="time"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+        <tr><td><input type="time"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 9. PENDIENTES -->
+<div class="sec">
+  <div class="sec-title">9. PENDIENTES PARA EL SIGUIENTE TURNO</div>
+  <div class="sec-body">
+    <div class="field-row one"><div class="field"><label>Alertas / sintomas nuevos</label><textarea id="alertas" placeholder="Ej: presenta tos con flema desde esta tarde..."></textarea></div></div>
+    <div class="field-row one"><div class="field"><label>Tareas pendientes</label><textarea id="pendientes" placeholder="Ej: falta administrar vitamina B6..."></textarea></div></div>
+    <div class="field-row one"><div class="field"><label>Suministros faltantes</label><textarea id="suministros" placeholder="Ej: reponer panales, se acabo el supracal..."></textarea></div></div>
+  </div>
+</div>
+
+<!-- REPORTE GENERADO -->
+<div id="preview" class="preview-wrap"></div>
+<button class="copy-btn" id="copy-btn" onclick="copiar()" style="display:none">Copiar reporte al portapapeles</button>
+<div id="copy-ok" class="copy-ok">Reporte copiado. Ahora peguelo en WhatsApp.</div>
+
+</div><!-- fin wrap -->
+
+<!-- BARRA INFERIOR FIJA -->
+<div class="btm-bar">
+  <button class="btn-gen" onclick="generar()">Generar reporte para enviar</button>
+  <button class="btn-clear" onclick="limpiar()">Limpiar</button>
+</div>
+
+<script>
+function v(id){ return document.getElementById(id)?.value?.trim() || '--'; }
+function vOpt(id){ return document.getElementById(id)?.value?.trim() || ''; }
+
+function fDate(d){
+  if(!d) return '--';
+  const [y,m,da]=d.split('-');
+  return da+'/'+m+'/'+y;
+}
+
+function getMeds(){
+  const rows=document.querySelectorAll('#med-body tr');
+  let out=[];
+  rows.forEach(r=>{
+    const n=r.querySelector('.mn')?.value?.trim();
+    if(n) out.push('   '+n+' | '+( r.querySelector('.md')?.value||'--')+' | '+(r.querySelector('.mv')?.value||'--')+' | '+(r.querySelector('.mh')?.value||'--')+' | '+(r.querySelector('.mt')?.value||'--')+(r.querySelector('.mo')?.value?' | '+r.querySelector('.mo').value:''));
+  });
+  return out.length?out.join('\n'):'   (ninguna registrada)';
+}
+
+function getMeals(){
+  const nm=['Desayuno','Almuerzo','Cena','Merienda'];
+  let out=[];
+  document.querySelectorAll('.etable tbody tr').forEach((r,i)=>{
+    if(i>=4)return;
+    const ins=r.querySelectorAll('input');
+    const al=ins[0]?.value?.trim();
+    out.push('   '+nm[i]+': '+(al||'no registrado')+(al?' | '+(ins[1]?.value||'--')+' | Posicion: '+(ins[2]?.value||'--')+(ins[3]?.value?' | '+ins[3].value:''):''));
+  });
+  return out.join('\n');
+}
+
+function getRows(tbodyId,labels){
+  const rows=document.querySelectorAll('#'+tbodyId+' tr');
+  let out=[];
+  rows.forEach(r=>{
+    const vals=Array.from(r.querySelectorAll('input,select')).map(el=>el.value?.trim()||'');
+    if(vals.some(v=>v&&v!='--')){
+      out.push('   '+labels.map((l,i)=>l+': '+(vals[i]||'--')).join(' | '));
+    }
+  });
+  return out.length?out.join('\n'):'   (sin registros)';
+}
+
+function generar(){
+  const txt=`
+================================================================
+    REPORTE DE TURNO DE ENFERMERIA - Sra. Ursula
+================================================================
+Tecnica: ${v('tecnica')}
+Turno: ${v('turno')}   Fecha: ${fDate(document.getElementById('fecha')?.value)}
+Inicio: ${v('hora_inicio')}   Entrega: ${v('hora_entrega')}
+Recibe el turno: ${v('recibe')}
+
+----------------------------------------------------------------
+1. SIGNOS VITALES
+----------------------------------------------------------------
+Inicio (${v('hora_sv1')}):  T: ${v('temp1')} C | FC: ${v('fc1')} lpm | PA: ${v('pa1')} | SpO2: ${v('sat1')}%
+Estado: ${v('estado1')}
+Final turno:  T: ${v('temp2')} C | FC: ${v('fc2')} lpm | PA: ${v('pa2')} | SpO2: ${v('sat2')}%
+
+----------------------------------------------------------------
+2. MEDICACION
+----------------------------------------------------------------
+${getMeds()}
+PRN: ${v('med_prn')}
+
+----------------------------------------------------------------
+3. NUTRICION E HIDRATACION
+----------------------------------------------------------------
+${getMeals()}
+Liquidos: ${v('liquidos')} (${v('tipo_liquido')})
+Observaciones: ${v('nutricion_obs')}
+
+----------------------------------------------------------------
+4. HIGIENE Y CUIDADO FISICO
+----------------------------------------------------------------
+Bano: ${v('bano')} | Tipo: ${v('bano_tipo')} | Hora: ${v('bano_hora')} | Colaboracion: ${v('bano_colab')}
+Respuesta al bano: ${v('bano_resp')}
+Higiene bucal: ${v('bucal')} - Hora: ${v('bucal_hora')}
+
+Deposicion: ${v('depo')} | Hora: ${v('depo_hora')} | Cantidad: ${v('depo_cant')} | Consistencia: ${v('depo_cons')}
+${vOpt('depo_obs')?'Obs: '+v('depo_obs'):''}
+
+Micciones: ${v('mictions')} cambios de panal | Orina: ${v('orina')}
+Caracteristicas: ${v('orina_caract')} | Ultimo cambio: ${v('ultimo_cambio')}
+${vOpt('orina_obs')?'Obs: '+v('orina_obs'):''}
+
+Piel: ${v('piel')} | Hidratacion en: ${v('hidrat')}
+${vOpt('piel_desc')?'Hallazgo: '+v('piel_desc'):''}
+
+----------------------------------------------------------------
+5. ESTADO CONDUCTUAL
+----------------------------------------------------------------
+Estado de animo: ${v('animo')}
+Alucinaciones: ${v('alucin')}${vOpt('alucin_desc')?' - '+v('alucin_desc'):''}
+
+Episodios de agitacion:
+${getRows('agit-body',['Inicio','Fin','Intensidad','Desencadenante','Intervencion','Respuesta'])}
+
+Episodios de agresividad:
+${getRows('agres-body',['Hora','Tipo','Dirigido a','Intervencion','Respuesta'])}
+
+----------------------------------------------------------------
+6. ACTIVIDAD FISICA
+----------------------------------------------------------------
+Deambulacion: ${v('deambul')} | Zonas: ${v('zonas')}
+Reposo: ${v('reposo')} | Calidad marcha: ${v('marcha')}
+Terapia: ${v('terapeuta')} | Duracion: ${v('terapia_dur')} | Colaboracion: ${v('terapia_colab')}
+${vOpt('terapia_obs')?'Obs terapeuta: '+v('terapia_obs'):''}
+${vOpt('ejercicios')?'Ejercicios: '+v('ejercicios'):''}
+
+----------------------------------------------------------------
+7. SUENO
+----------------------------------------------------------------
+Se acosto: ${v('s_acostar')} | Se durmio: ${v('s_dormir')}
+Conciliacion: ${v('s_concilia')} | Total: ${v('s_horas')}
+Desperto: ${v('s_despertar')} | Estado: ${v('s_estado')}
+Despertares:
+${getRows('sue-body',['Hora','Duracion','Motivo','Intervencion','Resultado'])}
+
+----------------------------------------------------------------
+8. VISITAS Y EVENTOS
+----------------------------------------------------------------
+${getRows('vis-body',['Hora','Evento','Duracion','Respuesta'])}
+
+----------------------------------------------------------------
+9. PENDIENTES PARA EL SIGUIENTE TURNO
+----------------------------------------------------------------
+Alertas: ${v('alertas')}
+Pendientes: ${v('pendientes')}
+Suministros: ${v('suministros')}
+
+================================================================
+Firma: ${v('tecnica')} | Entrego: ${v('hora_entrega')} | Recibio: ${v('recibe')}
+================================================================`.trim();
+
+  const pre=document.getElementById('preview');
+  pre.textContent=txt;
+  pre.classList.add('show');
+  document.getElementById('copy-btn').style.display='block';
+  pre.scrollIntoView({behavior:'smooth'});
+}
+
+function copiar(){
+  const txt=document.getElementById('preview').textContent;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(txt).then(()=>{
+      document.getElementById('copy-ok').style.display='block';
+      setTimeout(()=>document.getElementById('copy-ok').style.display='none',4000);
+    });
+  } else {
+    const ta=document.createElement('textarea');
+    ta.value=txt;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    document.getElementById('copy-ok').style.display='block';
+    setTimeout(()=>document.getElementById('copy-ok').style.display='none',4000);
+  }
+}
+
+function limpiar(){
+  if(!confirm('Limpiar todo el formulario?')) return;
+  document.querySelectorAll('input,select,textarea').forEach(el=>el.value='');
+  document.getElementById('preview').classList.remove('show');
+  document.getElementById('copy-btn').style.display='none';
+}
+</script>
+</body>
+</html>
