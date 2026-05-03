@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Turno Día - Sra. Úrsula</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:Arial,sans-serif;background:#f0f4f8;color:#1a1a1a;font-size:16px;-webkit-text-size-adjust:100%}
+
+/* HEADER */
+.header{background:#1F4E79;color:#fff;padding:18px 18px;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,0.3)}
+.header h1{font-size:24px;font-weight:700;line-height:1.2}
+.header p{font-size:15px;opacity:0.75;margin-top:6px;margin-bottom:2px}
+
+.wrap{padding:16px 14px 160px}
+
+/* SECCIONES */
+.sec{margin-bottom:20px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 1px 5px rgba(0,0,0,0.1)}
+.sec-title{background:#1F4E79;color:#fff;padding:15px 18px;font-size:19px;font-weight:700;letter-spacing:0.01em}
+.sec-body{padding:20px 18px}
+
+/* CAMPOS */
+.field{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.field:last-child{margin-bottom:0}
+label{font-size:14px;font-weight:700;color:#777;text-transform:uppercase;letter-spacing:0.07em}
+input[type=text],input[type=date],input[type=time]{width:100%;font-size:18px;padding:16px 18px;border:2px solid #d0d8e4;border-radius:12px;background:#fafbfc;color:#1a1a1a;font-family:Arial,sans-serif;-webkit-appearance:none;appearance:none;min-height:58px}
+input[type=time]:not(:focus)[data-empty="true"]{color:#bbb}
+input:focus{outline:none;border-color:#2E75B6;background:#fff}
+
+/* CHIP SELECTOR — siempre visible, sin dropdown */
+.chip-selector{position:relative;margin-bottom:2px}
+.chip-options{display:flex;flex-wrap:wrap;gap:10px;padding:4px 0}
+.chip-opt{padding:13px 22px;border-radius:30px;border:2px solid #d0d8e4;background:#fff;font-size:16px;cursor:pointer;user-select:none;transition:all 0.12s;font-family:Arial,sans-serif;color:#333}
+.chip-opt:active{transform:scale(0.97)}
+.chip-opt.chosen{background:#1F4E79;color:#fff;border-color:#1F4E79;font-weight:700}
+
+/* CARRUSEL — chips burbuja con scroll horizontal */
+.carousel-field{margin-bottom:36px}
+.carousel-label{font-size:16px;font-weight:700;color:#1F4E79;margin-bottom:12px;display:block}
+.carousel-selected-val{font-size:28px;color:#1F4E79;font-weight:700;margin-bottom:14px;min-height:38px;text-align:center;letter-spacing:0.01em}
+.carousel-selected-val:empty::before{content:'—';color:#ccc;font-size:22px}
+.carousel-hint{font-size:12px;color:#bbb;text-align:center;margin-top:8px;letter-spacing:0.03em}
+/* scroll container */
+.carousel-chips-scroll{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:6px 2px}
+.carousel-chips-scroll::-webkit-scrollbar{display:none}
+/* cada burbuja */
+.carousel-chip{flex:0 0 auto;width:72px;height:72px;display:flex;align-items:center;justify-content:center;border-radius:50%;border:2px solid #d0d8e4;background:#fff;font-size:17px;font-weight:600;color:#444;cursor:pointer;scroll-snap-align:center;transition:all 0.15s;user-select:none;-webkit-tap-highlight-color:transparent;box-shadow:0 1px 3px rgba(0,0,0,0.06)}
+.carousel-chip.sel{background:#1F4E79;border-color:#1F4E79;color:#fff;font-size:19px;font-weight:700;transform:scale(1.1);box-shadow:0 3px 10px rgba(31,78,121,0.3)}
+/* PA — dos scrolls lado a lado */
+.pa-row{display:flex;align-items:center;gap:8px}
+.pa-row .carousel-chips-scroll{flex:1}
+.pa-sep{font-size:26px;font-weight:700;color:#aaa;flex-shrink:0}
+
+/* SV sub-block */
+.sv-block{background:#f5f8fc;border-radius:14px;padding:20px 18px;margin-bottom:16px}
+.sv-block-title{font-size:18px;font-weight:700;color:#1F4E79;margin-bottom:22px;padding-bottom:12px;border-bottom:2px solid #D6E4F0}
+
+/* PRESION arterial */
+.pa-row{display:flex;align-items:center;gap:8px}
+.pa-row .carousel-wrap{flex:1}
+.pa-sep{font-size:26px;font-weight:700;color:#aaa;flex-shrink:0}
+
+/* SUBHEADER — inline label */
+.sub{font-size:13px;font-weight:700;color:#2E75B6;margin:24px 0 12px;text-transform:uppercase;letter-spacing:0.06em;border-left:4px solid #2E75B6;padding-left:10px}
+/* SUB BLOCK — caja azul como comida-block */
+.sub-block{background:#f5f8fc;border-radius:14px;padding:22px 18px;margin-bottom:20px;border:1px solid #e4eaf2}
+.sub-block-title{font-size:20px;font-weight:700;color:#1F4E79;margin-bottom:20px}
+
+/* CHIPS LIQUIDOS multi-select */
+.multi-chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
+.mchip{padding:13px 22px;border-radius:30px;border:2px solid #d0d8e4;background:#fff;font-size:16px;cursor:pointer;user-select:none;transition:all 0.12s;font-family:Arial,sans-serif;color:#333}
+.mchip.on{background:#1F4E79;color:#fff;border-color:#1F4E79;font-weight:700}
+
+/* MEDICACION */
+.med-group{margin-bottom:16px;border-radius:14px;overflow:hidden;border:1.5px solid #e0e0e0}
+.med-group-title{padding:11px 16px;font-size:14px;font-weight:700;color:#fff;letter-spacing:0.02em}
+.med-row{display:flex;align-items:center;padding:15px 16px;border-top:1px solid #ebebeb;gap:12px;min-height:60px}
+.med-row:first-of-type{border-top:none}
+.med-name{flex:1;font-size:16px;font-weight:600;color:#1a1a1a;line-height:1.3}
+.med-dosis{font-size:14px;color:#888;text-align:right;min-width:80px;line-height:1.3}
+.chk{width:50px;height:50px;border:2.5px solid #ccc;border-radius:12px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#fff;transition:all 0.15s;user-select:none;font-size:28px;color:transparent}
+.chk.on{background:#27ae60;border-color:#27ae60;color:#fff}
+.chk.on::after{content:'✓'}
+.med-extra-row{display:flex;align-items:center;padding:10px 16px;border-top:1px solid #ebebeb;gap:10px;background:#fafafa}
+.med-extra-row input{flex:1;border:1.5px solid #ddd;border-radius:10px;padding:12px 14px;font-size:16px;background:#fff;font-family:Arial,sans-serif}
+.g-antes{background:#E8956D}.g-desa{background:#E07070}.g-almu{background:#7A9FCC}
+.g-tera{background:#C4A84F}.g-cena{background:#5F9E6E}.g-cond{background:#9B78C2}
+
+/* COMIDAS */
+.comida-block{background:#f5f8fc;border-radius:14px;padding:22px 18px;margin-bottom:20px;border:1px solid #e4eaf2}
+.comida-title{font-size:22px;font-weight:700;color:#1F4E79;margin-bottom:20px}
+
+/* PASEOS */
+.paseo-card{background:#f5f8fc;border-radius:14px;padding:16px;margin-bottom:14px;border:1px solid #e4eaf2;position:relative}
+.paseo-del{position:absolute;top:12px;right:12px;background:none;border:none;color:#e74c3c;font-size:22px;cursor:pointer;font-weight:700;line-height:1;padding:4px;border-radius:8px}
+.paseo-tipo-row{margin-bottom:14px}
+.paseo-times{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.paseo-time-field{display:flex;flex-direction:column;gap:8px}
+.paseo-time-label{font-size:13px;font-weight:700;color:#777;text-transform:uppercase;letter-spacing:0.06em}
+.paseo-time-input{width:100%;font-size:17px;padding:14px 14px;border:2px solid #d0d8e4;border-radius:12px;background:#fff;font-family:Arial,sans-serif;-webkit-appearance:none;appearance:none;min-height:54px}
+.add-btn{background:none;border:2px dashed #2E75B6;color:#2E75B6;padding:15px 14px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;width:100%;margin-top:4px}
+
+/* VISITAS */
+.vis-card{background:#f5f8fc;border-radius:14px;padding:22px 18px;margin-bottom:18px;border:1px solid #e4eaf2;position:relative}
+.vis-del{position:absolute;top:12px;right:12px;background:none;border:none;color:#e74c3c;font-size:22px;cursor:pointer;font-weight:700;line-height:1;padding:4px;border-radius:8px}
+
+/* TEXTO LIBRE */
+textarea{width:100%;font-size:17px;padding:15px 16px;border:2px solid #d0d8e4;border-radius:12px;background:#fafbfc;color:#1a1a1a;font-family:Arial,sans-serif;-webkit-appearance:none;resize:vertical;min-height:120px;line-height:1.6}
+textarea:focus{outline:none;border-color:#2E75B6;background:#fff}
+
+/* BOTTOM */
+.btm-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #ddd;padding:12px 16px;display:flex;gap:10px;z-index:200;box-shadow:0 -2px 10px rgba(0,0,0,0.1)}
+.btn-pdf{flex:1;background:#e67e22;color:#fff;border:none;padding:16px;border-radius:12px;font-size:17px;font-weight:700;cursor:pointer}
+.btn-clear{background:#fff;color:#c0392b;border:2px solid #c0392b;padding:16px 16px;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer}
+.toast{position:fixed;bottom:95px;left:50%;transform:translateX(-50%);background:#27ae60;color:#fff;padding:12px 26px;border-radius:30px;font-size:15px;font-weight:700;z-index:300;display:none;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,0.2)}
+.toast.err{background:#e74c3c}
+/* CHIPS fijos para técnicas — nunca se mueven */
+#cs-tec1, #cs-tec2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#cs-tec1 .chip-opt, #cs-tec2 .chip-opt{width:100%;text-align:center;white-space:nowrap}
+.otra-wrap{overflow:hidden;transition:max-height 0.2s ease,opacity 0.2s ease;max-height:0;opacity:0}
+.otra-wrap.show{max-height:80px;opacity:1}
+.otra-input{width:100%;font-size:18px;padding:15px 16px;border:2px solid #d0d8e4;border-radius:12px;background:#fafbfc;color:#1a1a1a;font-family:Arial,sans-serif;-webkit-appearance:none;appearance:none;margin-top:10px;display:block}
+.otra-input:focus{outline:none;border-color:#2E75B6;background:#fff}
+.time-wrap{position:relative;width:100%}
+.time-ph{position:absolute;top:50%;left:16px;transform:translateY(-50%);font-size:18px;color:#bbb;pointer-events:none;font-family:Arial,sans-serif;letter-spacing:1px}
+.time-wrap.has-val .time-ph{display:none}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div><h1>Turno Día — Sra. Úrsula</h1><p>Reporte de enfermería</p></div>
+</div>
+
+<div class="wrap">
+
+<!-- 1. DATOS DEL TURNO -->
+<div class="sec">
+  <div class="sec-title">1. Datos del turno</div>
+  <div class="sec-body">
+    <div class="field">
+      <label>Fecha</label>
+      <input type="date" id="fecha">
+    </div>
+    <div class="field">
+      <label>Técnica 1</label>
+      <div class="chip-options" id="cs-tec1">
+        <div class="chip-opt" onclick="selectChipDirect('cs-tec1',this,'wrap-tec1')">Lisseth</div>
+        <div class="chip-opt" onclick="selectChipDirect('cs-tec1',this,'wrap-tec1')">Elizabeth</div>
+        <div class="chip-opt" onclick="selectChipDirect('cs-tec1',this,'wrap-tec1')">Susan</div>
+        <div class="chip-opt" onclick="selectChipDirect('cs-tec1',this,'wrap-tec1')">Otra</div>
+      </div>
+      <div class="otra-wrap" id="wrap-tec1">
+        <input type="text" id="tec1-otra" class="otra-input" placeholder="Nombre de la técnica">
+      </div>
+    </div>
+    <div class="field">
+      <label>Técnica 2</label>
+      <div class="chip-options" id="cs-tec2">
+        <div class="chip-opt" onclick="selectChipDirect('cs-tec2',this,'wrap-tec2')">Lisseth</div>
+        <div class="chip-opt" onclick="selectChipDirect('cs-tec2',this,'wrap-tec2')">Elizabeth</div>
+        <div class="chip-opt" onclick="selectChipDirect('cs-tec2',this,'wrap-tec2')">Susan</div>
+        <div class="chip-opt" onclick="selectChipDirect('cs-tec2',this,'wrap-tec2')">Otra</div>
+      </div>
+      <div class="otra-wrap" id="wrap-tec2">
+        <input type="text" id="tec2-otra" class="otra-input" placeholder="Nombre de la técnica">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. SIGNOS VITALES -->
+<div class="sec">
+  <div class="sec-title">2. Signos vitales</div>
+  <div class="sec-body">
+
+    <div class="sv-block">
+      <div class="sv-block-title">Al inicio del turno — 08:00</div>
+
+      <div class="carousel-field">
+        <span class="carousel-label">Temperatura (°C)</span>
+        <div class="carousel-selected-val" id="cv-temp1"></div>
+        <div id="cw-temp1"></div>
+        <div class="carousel-hint">← Desliza para elegir →</div>
+      </div>
+
+      <div class="carousel-field">
+        <span class="carousel-label">Frecuencia cardíaca (lpm)</span>
+        <div class="carousel-selected-val" id="cv-fc1"></div>
+        <div id="cw-fc1"></div>
+        <div class="carousel-hint">← Desliza para elegir →</div>
+      </div>
+
+      <div class="carousel-field">
+        <span class="carousel-label">Presión arterial (mmHg)</span>
+        <div class="carousel-selected-val" id="cv-pa1"></div>
+        <div class="pa-row">
+          <div id="cw-pa1s"></div>
+          <div class="pa-sep">/</div>
+          <div id="cw-pa1d"></div>
+        </div>
+        <div class="carousel-hint">← Desliza para elegir →</div>
+      </div>
+
+      <div class="carousel-field" style="margin-bottom:0">
+        <span class="carousel-label">Saturación O₂ (%)</span>
+        <div class="carousel-selected-val" id="cv-sat1"></div>
+        <div id="cw-sat1"></div>
+        <div class="carousel-hint">← Desliza para elegir →</div>
+      </div>
+    </div>
+
+    <div class="sv-block">
+      <div class="sv-block-title">Al final del turno — 19:00</div>
+
+      <div class="carousel-field">
+        <span class="carousel-label">Temperatura (°C)</span>
+        <div class="carousel-selected-val" id="cv-temp2"></div>
+        <div id="cw-temp2"></div>
+        <div class="carousel-hint">← Desliza para elegir →</div>
+      </div>
+
+      <div class="carousel-field">
+        <span class="carousel-label">Frecuencia cardíaca (lpm)</span>
+        <div class="carousel-selected-val" id="cv-fc2"></div>
+        <div id="cw-fc2"></div>
+        <div class="carousel-hint">← Desliza para elegir →</div>
+      </div>
+
+      <div class="carousel-field">
+        <span class="carousel-label">Presión arterial (mmHg)</span>
+        <div class="carousel-selected-val" id="cv-pa2"></div>
+        <div class="pa-row">
+          <div id="cw-pa2s"></div>
+          <div class="pa-sep">/</div>
+          <div id="cw-pa2d"></div>
+        </div>
+        <div class="carousel-hint">← Desliza para elegir →</div>
+      </div>
+
+      <div class="carousel-field" style="margin-bottom:0">
+        <span class="carousel-label">Saturación O₂ (%)</span>
+        <div class="carousel-selected-val" id="cv-sat2"></div>
+        <div id="cw-sat2"></div>
+        <div class="carousel-hint">← Desliza para elegir →</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 3. MEDICACIÓN -->
+<div class="sec">
+  <div class="sec-title">3. Medicación administrada</div>
+  <div class="sec-body">
+    <div class="med-group">
+      <div class="med-group-title g-antes">ANTES DEL DESAYUNO</div>
+      <div class="med-row"><div class="med-name">Vit C</div><div class="med-dosis">1 tab</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med-row"><div class="med-name">Meteospasmyl 300mg</div><div class="med-dosis">1 cap</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med-row"><div class="med-name">Lenzetto spray</div><div class="med-dosis">2 puff post-baño</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+    </div>
+    <div class="med-group">
+      <div class="med-group-title g-desa">DESAYUNO</div>
+      <div class="med-row"><div class="med-name">Sertralina 50mg</div><div class="med-dosis">1/2 tab</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med-row"><div class="med-name">Propanolol 40mg</div><div class="med-dosis">1/2 tab</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med-row"><div class="med-name">Compl B6</div><div class="med-dosis">1 tab</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+    </div>
+    <div class="med-group">
+      <div class="med-group-title g-almu">ALMUERZO</div>
+      <div class="med-row"><div class="med-name">Propanolol 40mg</div><div class="med-dosis">1 tab</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med-row"><div class="med-name">Clonazepam 0.5mg</div><div class="med-dosis">1 tab</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med-row"><div class="med-name">Compl B6</div><div class="med-dosis">1 tab</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+    </div>
+    <div class="med-group">
+      <div class="med-group-title g-tera">DESPUÉS DE TERAPIA</div>
+      <div class="med-row"><div class="med-name">Supracalm 1gr</div><div class="med-dosis">1 tab (condicional)</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+    </div>
+    <div class="med-group">
+      <div class="med-group-title g-cena">CENA</div>
+      <div class="med-row"><div class="med-name">Quetiapina 25mg</div><div class="med-dosis">1/2 tab</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med-row"><div class="med-name">Compl B6</div><div class="med-dosis">1 tab</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med-row"><div class="med-name">Propanolol 40mg</div><div class="med-dosis">1/2 tab</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med-row"><div class="med-name">Supracalm 1gr</div><div class="med-dosis">1 tab</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med-row"><div class="med-name">Meteospasmyl 300mg</div><div class="med-dosis">1 cap</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+    </div>
+    <div class="med-group">
+      <div class="med-group-title g-cond">CONDICIONAL</div>
+      <div class="med-row"><div class="med-name">Orfenadrina 100mg</div><div class="med-dosis">1 tab</div><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+    </div>
+    <div class="sub">Medicamentos adicionales</div>
+    <div class="med-group" id="extra-meds">
+      <div class="med-extra-row"><input type="text" placeholder="Medicamento y dosis"><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med-extra-row"><input type="text" placeholder="Medicamento y dosis"><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+      <div class="med-extra-row"><input type="text" placeholder="Medicamento y dosis"><div class="chk" onclick="this.classList.toggle('on')"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. NUTRICIÓN E HIDRATACIÓN -->
+<div class="sec">
+  <div class="sec-title">4. Nutrición e hidratación</div>
+  <div class="sec-body">
+
+    <div class="comida-block">
+      <div class="comida-title">Desayuno</div>
+      <div class="field">
+        <label>Hora</label>
+        <input type="time" class="mhora" id="hora-desayuno">
+      </div>
+      <div class="field">
+        <label>Alimentos</label>
+        <input type="text" class="mal" placeholder="Ej: avena con fruta, infusión...">
+      </div>
+      <div class="field">
+        <label>% consumido</label>
+        <div class="chip-options" id="cs-pct-desayuno">
+          <div class="chip-opt" onclick="selectChipDirect('cs-pct-desayuno',this)">0%</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-pct-desayuno',this)">25%</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-pct-desayuno',this)">50%</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-pct-desayuno',this)">75%</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-pct-desayuno',this)">100%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="comida-block">
+      <div class="comida-title">Almuerzo</div>
+      <div class="field">
+        <label>Hora</label>
+        <input type="time" class="mhora" id="hora-almuerzo">
+      </div>
+      <div class="field">
+        <label>Alimentos</label>
+        <input type="text" class="mal" placeholder="Ej: arroz con pollo, ensalada...">
+      </div>
+      <div class="field">
+        <label>% consumido</label>
+        <div class="chip-options" id="cs-pct-almuerzo">
+          <div class="chip-opt" onclick="selectChipDirect('cs-pct-almuerzo',this)">0%</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-pct-almuerzo',this)">25%</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-pct-almuerzo',this)">50%</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-pct-almuerzo',this)">75%</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-pct-almuerzo',this)">100%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="comida-block">
+      <div class="comida-title">Cena</div>
+      <div class="field">
+        <label>Hora</label>
+        <input type="time" class="mhora" id="hora-cena">
+      </div>
+      <div class="field">
+        <label>Alimentos</label>
+        <input type="text" class="mal" placeholder="Ej: sopa, pan, jugo...">
+      </div>
+      <div class="field">
+        <label>% consumido</label>
+        <div class="chip-options" id="cs-pct-cena">
+          <div class="chip-opt" onclick="selectChipDirect('cs-pct-cena',this)">0%</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-pct-cena',this)">25%</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-pct-cena',this)">50%</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-pct-cena',this)">75%</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-pct-cena',this)">100%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="comida-block">
+      <div class="comida-title">Merienda</div>
+      <div class="field">
+        <label>Hora</label>
+        <input type="time" class="mhora" id="hora-merienda">
+      </div>
+      <div class="field">
+        <label>Alimentos</label>
+        <input type="text" class="mal" placeholder="Ej: fruta, galletas...">
+      </div>
+      <div class="field">
+        <label>% consumido</label>
+        <div class="chip-options" id="cs-pct-merienda">
+          <div class="chip-opt" onclick="selectChipDirect('cs-pct-merienda',this)">0%</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-pct-merienda',this)">25%</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-pct-merienda',this)">50%</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-pct-merienda',this)">75%</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-pct-merienda',this)">100%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-block">
+      <div class="sub-block-title">Hidratación</div>
+      <div class="field">
+        <label>Total de líquidos</label>
+        <div class="chip-options" id="cs-liq">
+          <div class="chip-opt" onclick="selectChipDirect('cs-liq',this)">200 ml</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-liq',this)">400 ml</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-liq',this)">600 ml</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-liq',this)">800 ml</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-liq',this)">1000 ml</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-liq',this)">1200 ml</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-liq',this)">1400 ml</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-liq',this)">1600 ml</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-liq',this)">1800 ml</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-liq',this)">2000 ml</div>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Tipos de líquido</label>
+        <div class="multi-chips">
+          <div class="mchip" onclick="this.classList.toggle('on')" data-val="Agua">Agua</div>
+          <div class="mchip" onclick="this.classList.toggle('on')" data-val="Infusión">Infusión</div>
+          <div class="mchip" onclick="this.classList.toggle('on')" data-val="Jugo">Jugo</div>
+          <div class="mchip" onclick="this.classList.toggle('on')" data-val="Caldo">Caldo</div>
+          <div class="mchip" onclick="this.classList.toggle('on')" data-val="Leche">Leche</div>
+          <div class="mchip" onclick="this.classList.toggle('on')" data-val="Sopa">Sopa</div>
+          <div class="mchip" onclick="this.classList.toggle('on')" data-val="Gelatina">Gelatina</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. HIGIENE Y CUIDADO FÍSICO -->
+<div class="sec">
+  <div class="sec-title">5. Higiene y cuidado físico</div>
+  <div class="sec-body">
+
+    <div class="sub-block">
+      <div class="sub-block-title">Baño</div>
+      <div class="field">
+        <label>Baño realizado</label>
+        <div class="chip-options" id="cs-bano">
+          <div class="chip-opt" onclick="selectChipDirect('cs-bano',this)">Sí</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-bano',this)">No</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Tipo de baño</label>
+        <div class="chip-options" id="cs-bano-tipo">
+          <div class="chip-opt" onclick="selectChipDirect('cs-bano-tipo',this)">Ducha</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-bano-tipo',this)">Esponja / cama</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Hora del baño</label>
+        <input type="time" id="bano_hora">
+      </div>
+      <div class="field">
+        <label>Colaboración</label>
+        <div class="chip-options" id="cs-bano-colab">
+          <div class="chip-opt" onclick="selectChipDirect('cs-bano-colab',this)">Sí, colaboró</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-bano-colab',this)">Parcialmente</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-bano-colab',this)">No colaboró</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Higiene bucal</label>
+        <div class="chip-options" id="cs-bucal">
+          <div class="chip-opt" onclick="selectChipDirect('cs-bucal',this)">Sí</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-bucal',this)">No</div>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Hora higiene bucal</label>
+        <input type="time" id="bucal_hora">
+      </div>
+    </div>
+
+    <div class="sub-block">
+      <div class="sub-block-title">Deposición</div>
+      <div class="field">
+        <label>¿Realizó deposición?</label>
+        <div class="chip-options" id="cs-depo">
+          <div class="chip-opt" onclick="selectChipDirect('cs-depo',this)">Sí</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-depo',this)">No</div>
+        </div>
+      </div>
+      <div class="field" id="depo-veces-field">
+        <label>¿Cuántas veces?</label>
+        <div class="chip-options" id="cs-depo-veces">
+          <div class="chip-opt" onclick="selectChipDirect('cs-depo-veces',this)">1 vez</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-depo-veces',this)">2 veces</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-depo-veces',this)">3 veces</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-depo-veces',this)">Más de 3</div>
+        </div>
+      </div>
+      <div class="field" id="depo-hora-field" style="margin-bottom:0">
+        <label>Hora de la deposición</label>
+        <input type="time" id="depo_hora">
+      </div>
+    </div>
+
+    <div class="sub-block">
+      <div class="sub-block-title">Micciones</div>
+      <div class="field">
+        <label>Número de cambios de pañal</label>
+        <div class="chip-options" id="cs-mictions">
+          <div class="chip-opt" onclick="selectChipDirect('cs-mictions',this)">1</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-mictions',this)">2</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-mictions',this)">3</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-mictions',this)">4</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-mictions',this)">5</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-mictions',this)">6</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-mictions',this)">7</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-mictions',this)">8+</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Presencia de orina</label>
+        <div class="chip-options" id="cs-orina">
+          <div class="chip-opt" onclick="selectChipDirect('cs-orina',this)">Sí, en todos</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-orina',this)">En algunos cambios</div>
+          <div class="chip-opt" onclick="selectChipDirect('cs-orina',this)">No se detectó</div>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Hora último cambio</label>
+        <input type="time" id="ultimo_cambio">
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 6. ACTIVIDAD FÍSICA -->
+<div class="sec">
+  <div class="sec-title">6. Actividad física</div>
+  <div class="sec-body">
+    <div class="sub-block">
+      <div class="sub-block-title">Caminatas y paseos</div>
+      <div id="paseos-container">
+        <div class="paseo-card">
+          <button class="paseo-del" onclick="delPaseo(this)">×</button>
+          <div class="paseo-tipo-row">
+            <div style="font-size:13px;font-weight:700;color:#777;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Tipo</div>
+            <div class="chip-options paseo-tipo" id="cs-paseo-0">
+              <div class="chip-opt" onclick="selectChipDirect('cs-paseo-0',this)">Caminata</div>
+              <div class="chip-opt" onclick="selectChipDirect('cs-paseo-0',this)">Paseo en carro</div>
+            </div>
+          </div>
+          <div class="paseo-times">
+            <div class="paseo-time-field">
+              <span class="paseo-time-label">Hora de inicio</span>
+              <input type="time" class="paseo-desde paseo-time-input">
+            </div>
+            <div class="paseo-time-field">
+              <span class="paseo-time-label">Hora de fin</span>
+              <input type="time" class="paseo-hasta paseo-time-input">
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="add-btn" onclick="addPaseo()">+ Agregar paseo / caminata</button>
+    </div>
+  </div>
+</div>
+
+<!-- 7. VISITAS -->
+<div class="sec">
+  <div class="sec-title">7. Visitas</div>
+  <div class="sec-body">
+    <div id="vis-container">
+      <div class="vis-card">
+        <button class="vis-del" onclick="delVisita(this)">×</button>
+        <div class="field">
+          <label>Hora</label>
+          <input type="time" class="vis-hora">
+        </div>
+        <div class="field">
+          <label>Visitante</label>
+          <input type="text" class="vis-nombre" placeholder="Nombre del visitante">
+        </div>
+        <div class="field">
+          <label>Duración</label>
+          <div class="chip-options" id="cs-vis-dur-0">
+            <div class="chip-opt" onclick="selectChipDirect('cs-vis-dur-0',this)">15 min</div>
+            <div class="chip-opt" onclick="selectChipDirect('cs-vis-dur-0',this)">30 min</div>
+            <div class="chip-opt" onclick="selectChipDirect('cs-vis-dur-0',this)">45 min</div>
+            <div class="chip-opt" onclick="selectChipDirect('cs-vis-dur-0',this)">1 hora</div>
+            <div class="chip-opt" onclick="selectChipDirect('cs-vis-dur-0',this)">2 horas</div>
+            <div class="chip-opt" onclick="selectChipDirect('cs-vis-dur-0',this)">Todo el día</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="add-btn" onclick="addVisita()">+ Agregar visita</button>
+  </div>
+</div>
+
+<!-- 8. ESTADO DE ÁNIMO -->
+<div class="sec">
+  <div class="sec-title">8. Estado de ánimo general</div>
+  <div class="sec-body">
+    <div class="field" style="margin-bottom:0">
+      <label>Estado de ánimo</label>
+      <div class="chip-options" id="cs-animo">
+        <div class="chip-opt" onclick="selectChipDirect('cs-animo',this)">Tranquila y colaboradora</div>
+        <div class="chip-opt" onclick="selectChipDirect('cs-animo',this)">Tranquila con ansiedad</div>
+        <div class="chip-opt" onclick="selectChipDirect('cs-animo',this)">Ansiosa / inquieta</div>
+        <div class="chip-opt" onclick="selectChipDirect('cs-animo',this)">Llorosa</div>
+        <div class="chip-opt" onclick="selectChipDirect('cs-animo',this)">Agitada (leve)</div>
+        <div class="chip-opt" onclick="selectChipDirect('cs-animo',this)">Agitada (moderada)</div>
+        <div class="chip-opt" onclick="selectChipDirect('cs-animo',this)">Agitada (severa)</div>
+        <div class="chip-opt" onclick="selectChipDirect('cs-animo',this)">Agresiva</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 9. OBSERVACIONES GENERALES -->
+<div class="sec" style="margin-bottom:0">
+  <div class="sec-title">9. Observaciones generales</div>
+  <div class="sec-body" style="padding-bottom:20px">
+    <div class="field" style="margin-bottom:0">
+      <textarea id="obs_generales" placeholder="Escribe aquí cualquier observación del turno..." style="min-height:130px"></textarea>
+    </div>
+  </div>
+</div>
+
+</div><!-- fin wrap -->
+
+<div class="btm-bar">
+  <button class="btn-pdf" onclick="generarPDF()">Generar reporte del turno</button>
+  <button class="btn-clear" onclick="limpiar()">×</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ══ FECHA DE HOY POR DEFECTO ══
+(function(){
+  const d=new Date();
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const da=String(d.getDate()).padStart(2,'0');
+  document.getElementById('fecha').value=y+'-'+m+'-'+da;
+})();
+
+// ══ TIME INPUTS — placeholder "--:--" en iOS ══
+function wrapTimeInputs(){
+  document.querySelectorAll('input[type=time]').forEach(inp=>{
+    if(inp.closest('.time-wrap'))return; // ya envuelto
+    const wrap=document.createElement('div');
+    wrap.className='time-wrap'+(inp.value?' has-val':'');
+    inp.parentNode.insertBefore(wrap,inp);
+    wrap.appendChild(inp);
+    const ph=document.createElement('span');
+    ph.className='time-ph';
+    ph.textContent='--:--';
+    wrap.appendChild(ph);
+    inp.addEventListener('change',()=>{
+      wrap.classList.toggle('has-val',!!inp.value);
+    });
+    inp.addEventListener('input',()=>{
+      wrap.classList.toggle('has-val',!!inp.value);
+    });
+  });
+}
+document.addEventListener('DOMContentLoaded',wrapTimeInputs);
+
+// ══ CHIP SELECTOR — siempre visible ══
+function selectChipDirect(id, el, wrapId) {
+  const container = document.getElementById(id);
+  if (!container) return;
+  container.querySelectorAll('.chip-opt').forEach(c => c.classList.remove('chosen'));
+  el.classList.add('chosen');
+  if (wrapId) {
+    const wrap = document.getElementById(wrapId);
+    if (wrap) {
+      const isOtra = el.textContent.trim() === 'Otra';
+      wrap.classList.toggle('show', isOtra);
+      if (!isOtra) {
+        const inp = wrap.querySelector('input');
+        if (inp) inp.value = '';
+      } else {
+        const inp = wrap.querySelector('input');
+        if (inp) setTimeout(() => inp.focus(), 250);
+      }
+    }
+  }
+}
+
+function getChipVal(id) {
+  const el = document.getElementById(id);
+  if (!el) return '--';
+  const chosen = el.querySelector('.chip-opt.chosen');
+  return chosen ? chosen.textContent.trim() : '--';
+}
+
+function getTec(n) {
+  const val = getChipVal('cs-tec' + n);
+  if (val === 'Otra') return document.getElementById('tec' + n + '-otra')?.value?.trim() || 'Otra';
+  return val;
+}
+// ══ CARRUSEL — chips burbuja con scroll horizontal ══
+const CAROUSELS={};
+function buildCarousel(containerId,items,defaultVal,onSelect){
+  const wrap=document.getElementById(containerId);
+  if(!wrap)return;
+  wrap.className='carousel-chips-scroll';
+  items.forEach(item=>{
+    const div=document.createElement('div');
+    div.className='carousel-chip'+(String(item)===String(defaultVal)?' sel':'');
+    div.textContent=item;
+    div.onclick=()=>{
+      wrap.querySelectorAll('.carousel-chip').forEach(d=>d.classList.remove('sel'));
+      div.classList.add('sel');
+      CAROUSELS[containerId]=item;
+      if(onSelect)onSelect(item);
+    };
+    wrap.appendChild(div);
+  });
+  CAROUSELS[containerId]=defaultVal;
+  // scroll to default
+  setTimeout(()=>{
+    const sel=wrap.querySelector('.carousel-chip.sel');
+    if(sel)sel.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});
+  },80);
+}
+
+function getCarouselVal(id){
+  const wrap=document.getElementById(id);
+  if(wrap){
+    const sel=wrap.querySelector('.carousel-chip.sel');
+    if(sel)return sel.textContent.trim();
+  }
+  return CAROUSELS[id]||'--';
+}
+
+// carrusel sync PA display
+function updatePaDisplay(n){
+  const s=getCarouselVal('cw-pa'+n+'s');
+  const d=getCarouselVal('cw-pa'+n+'d');
+  const el=document.getElementById('cv-pa'+n);
+  if(el)el.textContent=(s!=='--'&&d!=='--')?s+' / '+d+' mmHg':'';
+}
+
+// temperaturas 34.0-42.0 paso 0.1
+const temps=[];
+for(let t=340;t<=420;t++)temps.push((t/10).toFixed(1));
+// FC 40-140
+const fcs=[];for(let f=40;f<=140;f++)fcs.push(f);
+// PA sistolica 80-180
+const paSis=[];for(let p=80;p<=180;p++)paSis.push(p);
+// PA diastolica 40-110
+const paDia=[];for(let p=40;p<=110;p++)paDia.push(p);
+// Sat 85-100
+const sats=[];for(let s=85;s<=100;s++)sats.push(s);
+
+buildCarousel('cw-temp1',temps,'36.5',v=>{document.getElementById('cv-temp1').textContent=v+' °C';});
+buildCarousel('cw-fc1',fcs,75,v=>{document.getElementById('cv-fc1').textContent=v+' lpm';});
+buildCarousel('cw-pa1s',paSis,120,()=>updatePaDisplay(1));
+buildCarousel('cw-pa1d',paDia,80,()=>updatePaDisplay(1));
+buildCarousel('cw-sat1',sats,97,v=>{document.getElementById('cv-sat1').textContent=v+'%';});
+
+buildCarousel('cw-temp2',temps,'36.5',v=>{document.getElementById('cv-temp2').textContent=v+' °C';});
+buildCarousel('cw-fc2',fcs,75,v=>{document.getElementById('cv-fc2').textContent=v+' lpm';});
+buildCarousel('cw-pa2s',paSis,120,()=>updatePaDisplay(2));
+buildCarousel('cw-pa2d',paDia,80,()=>updatePaDisplay(2));
+buildCarousel('cw-sat2',sats,97,v=>{document.getElementById('cv-sat2').textContent=v+'%';});
+
+// ══ PASEOS ══
+let paseoCount=1;
+function addPaseo(){
+  const c=document.getElementById('paseos-container');
+  const id='cs-paseo-'+paseoCount;
+  const d=document.createElement('div');d.className='paseo-card';
+  d.innerHTML=`<button class="paseo-del" onclick="delPaseo(this)">×</button><div class="paseo-tipo-row"><div style="font-size:13px;font-weight:700;color:#777;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Tipo</div><div class="chip-options paseo-tipo" id="${id}"><div class="chip-opt" onclick="selectChipDirect('${id}',this)">Caminata</div><div class="chip-opt" onclick="selectChipDirect('${id}',this)">Paseo en carro</div></div></div><div class="paseo-times"><div class="paseo-time-field"><span class="paseo-time-label">Hora de inicio</span><input type="time" class="paseo-desde paseo-time-input"></div><div class="paseo-time-field"><span class="paseo-time-label">Hora de fin</span><input type="time" class="paseo-hasta paseo-time-input"></div></div>`;
+  c.appendChild(d);paseoCount++;wrapTimeInputs();
+}
+function delPaseo(btn){if(document.querySelectorAll('.paseo-card').length>1)btn.closest('.paseo-card').remove();}
+
+function getPaseos(){
+  return Array.from(document.querySelectorAll('.paseo-card')).map(r=>{
+    const desde=r.querySelector('.paseo-desde')?.value||'';
+    const hasta=r.querySelector('.paseo-hasta')?.value||'';
+    const csEl=r.querySelector('.chip-options');
+    const tipo=csEl?.querySelector('.chip-opt.chosen')?.textContent?.trim()||'--';
+    return{desde,hasta,tipo};
+  }).filter(p=>p.desde||p.tipo!=='--');
+}
+
+// ══ VISITAS ══
+let visCount=1;
+function addVisita(){
+  const c=document.getElementById('vis-container');
+  const id='cs-vis-dur-'+visCount;
+  const d=document.createElement('div');d.className='vis-card';
+  d.innerHTML=`<button class="vis-del" onclick="delVisita(this)">×</button><div class="field"><label>Hora</label><input type="time" class="vis-hora"></div><div class="field"><label>Visitante</label><input type="text" class="vis-nombre" placeholder="Nombre del visitante"></div><div class="field"><label>Duración</label><div class="chip-options" id="${id}"><div class="chip-opt" onclick="selectChipDirect('${id}',this)">15 min</div><div class="chip-opt" onclick="selectChipDirect('${id}',this)">30 min</div><div class="chip-opt" onclick="selectChipDirect('${id}',this)">45 min</div><div class="chip-opt" onclick="selectChipDirect('${id}',this)">1 hora</div><div class="chip-opt" onclick="selectChipDirect('${id}',this)">2 horas</div><div class="chip-opt" onclick="selectChipDirect('${id}',this)">Todo el día</div></div></div>`;
+  c.appendChild(d);visCount++;wrapTimeInputs();
+}
+
+function delVisita(btn){if(document.querySelectorAll('.vis-card').length>1)btn.closest('.vis-card').remove();}
+
+// ══ HELPERS ══
+function v(id){return document.getElementById(id)?.value?.trim()||'--';}
+function vOpt(id){return document.getElementById(id)?.value?.trim()||'';}
+function fDate(d){if(!d)return'--';const[y,m,da]=d.split('-');return da+'/'+m+'/'+y;}
+function fDateFile(d){if(!d)return'sin-fecha';const[y,m,da]=d.split('-');return da+'-'+m+'-'+y;}
+function getMultiChips(sel){return Array.from(document.querySelectorAll(sel+'.on')).map(c=>c.dataset.val).join(', ')||'--';}
+
+function getMeds(){
+  const groups={};
+  const order=['Antes desayuno','Desayuno','Almuerzo','Después de terapia','Cena','Condicional','Adicional'];
+  order.forEach(k=>groups[k]=[]);
+  document.querySelectorAll('.med-row').forEach(r=>{
+    const nameEl=r.querySelector('.med-name');
+    const dosisEl=r.querySelector('.med-dosis');
+    const chk=r.querySelector('.chk');
+    if(!nameEl||!chk)return;
+    const title=r.closest('.med-group')?.querySelector('.med-group-title')?.textContent?.trim()||'';
+    let key='Adicional';
+    if(title.includes('ANTES'))key='Antes desayuno';
+    else if(title.includes('DESAYUNO'))key='Desayuno';
+    else if(title.includes('ALMUERZO'))key='Almuerzo';
+    else if(title.includes('TERAPIA'))key='Después de terapia';
+    else if(title.includes('CENA'))key='Cena';
+    else if(title.includes('CONDICIONAL'))key='Condicional';
+    groups[key].push({nombre:nameEl.textContent.trim(),dosis:dosisEl?.textContent.trim()||'',checked:chk.classList.contains('on')});
+  });
+  document.querySelectorAll('.med-extra-row').forEach(r=>{
+    const inp=r.querySelector('input');const chk=r.querySelector('.chk');
+    if(!inp||!chk||!inp.value.trim())return;
+    groups['Adicional'].push({nombre:inp.value.trim(),dosis:'',checked:chk.classList.contains('on')});
+  });
+  return groups;
+}
+
+function getMeals(){
+  return[
+    {comida:'Desayuno',hora:v('hora-desayuno'),alimentos:document.querySelectorAll('.mal')[0]?.value||'--',pct:getChipVal('cs-pct-desayuno')},
+    {comida:'Almuerzo',hora:v('hora-almuerzo'),alimentos:document.querySelectorAll('.mal')[1]?.value||'--',pct:getChipVal('cs-pct-almuerzo')},
+    {comida:'Cena',hora:v('hora-cena'),alimentos:document.querySelectorAll('.mal')[2]?.value||'--',pct:getChipVal('cs-pct-cena')},
+    {comida:'Merienda',hora:v('hora-merienda'),alimentos:document.querySelectorAll('.mal')[3]?.value||'--',pct:getChipVal('cs-pct-merienda')},
+  ];
+}
+
+function getVisitas(){
+  return Array.from(document.querySelectorAll('.vis-card')).map(r=>{
+    const hora=r.querySelector('.vis-hora')?.value||'';
+    const nombre=r.querySelector('.vis-nombre')?.value?.trim()||'';
+    const csEl=r.querySelector('.chip-options');
+    const dur=csEl?.querySelector('.chip-opt.chosen')?.textContent?.trim()||'--';
+    return{hora,nombre,dur};
+  }).filter(vi=>vi.hora||vi.nombre);
+}
+
+function showToast(msg,err){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast'+(err?' err':'');
+  t.style.display='block';setTimeout(()=>t.style.display='none',3500);
+}
+
+function limpiar(){
+  if(!confirm('¿Limpiar todo el formulario?'))return;
+  (function(){const d=new Date();const y=d.getFullYear();const m=String(d.getMonth()+1).padStart(2,'0');const da=String(d.getDate()).padStart(2,'0');document.getElementById('fecha').value=y+'-'+m+'-'+da;})();
+  document.querySelectorAll('input[type=text],input[type=time]').forEach(el=>el.value='');
+  document.querySelectorAll('.chk,.mchip').forEach(el=>el.classList.remove('on'));
+  document.querySelectorAll('.chip-opt').forEach(el=>el.classList.remove('chosen'));
+  document.querySelectorAll('.otra-wrap').forEach(w=>{w.classList.remove('show');const i=w.querySelector('input');if(i)i.value='';});
+  document.getElementById('obs_generales').value='';
+  document.getElementById('paseos-container').innerHTML='<div class="paseo-card"><button class="paseo-del" onclick="delPaseo(this)">×</button><div class="paseo-tipo-row"><div style="font-size:13px;font-weight:700;color:#777;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Tipo</div><div class="chip-options paseo-tipo" id="cs-paseo-0"><div class="chip-opt" onclick="selectChipDirect(\'cs-paseo-0\',this)">Caminata</div><div class="chip-opt" onclick="selectChipDirect(\'cs-paseo-0\',this)">Paseo en carro</div></div></div><div class="paseo-times"><div class="paseo-time-field"><span class="paseo-time-label">Hora de inicio</span><input type="time" class="paseo-desde paseo-time-input"></div><div class="paseo-time-field"><span class="paseo-time-label">Hora de fin</span><input type="time" class="paseo-hasta paseo-time-input"></div></div></div>';
+  document.getElementById('vis-container').innerHTML='<div class="vis-card"><div class="field"><label>Hora</label><input type="time" class="vis-hora"></div><div class="field"><label>Visitante</label><input type="text" class="vis-nombre" placeholder="Nombre del visitante"></div><div class="field"><label>Duración</label><div class="chip-options" id="cs-vis-dur-0"><div class="chip-opt" onclick="selectChipDirect(\'cs-vis-dur-0\',this)">15 min</div><div class="chip-opt" onclick="selectChipDirect(\'cs-vis-dur-0\',this)">30 min</div><div class="chip-opt" onclick="selectChipDirect(\'cs-vis-dur-0\',this)">45 min</div><div class="chip-opt" onclick="selectChipDirect(\'cs-vis-dur-0\',this)">1 hora</div><div class="chip-opt" onclick="selectChipDirect(\'cs-vis-dur-0\',this)">2 horas</div><div class="chip-opt" onclick="selectChipDirect(\'cs-vis-dur-0\',this)">Todo el día</div></div></div></div>';
+  paseoCount=1;visCount=1;
+}
+
+function buildPaseoHTML(id){
+  return`<div class="paseo-row"><span class="paseo-lbl">De</span><input type="time" class="paseo-desde"><span class="paseo-lbl">a</span><input type="time" class="paseo-hasta"><div class="chip-selector" style="flex:1;min-width:130px;margin-bottom:0" id="${id}"><div class="chip-selected" onclick="toggleChipSel('${id}')"><span class="sel-text placeholder">Tipo...</span><span class="arr">▼</span></div><div class="chip-options"><div class="chip-opt" onclick="selectChip('${id}',this)">Caminata</div><div class="chip-opt" onclick="selectChip('${id}',this)">Paseo en carro</div><div class="chip-opt" onclick="selectChip('${id}',this)">Parque</div><div class="chip-opt" onclick="selectChip('${id}',this)">Centro comercial</div><div class="chip-opt" onclick="selectChip('${id}',this)">Casa (interior)</div><div class="chip-opt" onclick="selectChip('${id}',this)">Otro</div></div></div><button class="del-btn" onclick="delPaseo(this)">×</button></div>`;
+}
+function buildVisHTML(id){
+  return`<div class="vis-card"><div class="field"><label>Hora</label><input type="time" class="vis-hora"></div><div class="field"><label>Visitante</label><input type="text" class="vis-nombre" placeholder="Nombre del visitante"></div><div class="field"><label>Duración</label><div class="chip-selector" id="${id}"><div class="chip-selected" onclick="toggleChipSel('${id}')"><span class="sel-text placeholder">Seleccionar...</span><span class="arr">▼</span></div><div class="chip-options"><div class="chip-opt" onclick="selectChip('${id}',this)">15 min</div><div class="chip-opt" onclick="selectChip('${id}',this)">30 min</div><div class="chip-opt" onclick="selectChip('${id}',this)">45 min</div><div class="chip-opt" onclick="selectChip('${id}',this)">1 hora</div><div class="chip-opt" onclick="selectChip('${id}',this)">2 horas</div><div class="chip-opt" onclick="selectChip('${id}',this)">Todo el día</div></div></div></div></div>`;
+}
+
+// ══ STATUS ══
+function stsTemp(t){const n=parseFloat(t);if(isNaN(n))return'info';if(n>=38)return'alert';if(n>=37.5)return'warn';return'ok';}
+function stsFc(f){const n=parseInt(f);if(isNaN(n))return'info';if(n<50||n>110)return'alert';if(n<60||n>95)return'warn';return'ok';}
+function stsSat(s){const n=parseInt(s);if(isNaN(n))return'info';if(n<90)return'alert';if(n<94)return'warn';return'ok';}
+function stsAnimo(a){if(!a||a==='--')return'info';if(a.includes('severa')||a.includes('Agresiva'))return'alert';if(a.includes('Agitada')||a.includes('Llorosa')||a.includes('Ansiosa'))return'warn';return'ok';}
+function stsLiq(l){const n=parseInt(l);if(isNaN(n))return'info';if(n<1000)return'alert';if(n<1600)return'warn';return'ok';}
+function stsMeal(pct){const n=parseInt(pct);if(isNaN(n))return'info';if(n<40)return'alert';if(n<65)return'warn';return'ok';}
+function stsMed(meds){let t=0,c=0;Object.values(meds).forEach(arr=>arr.forEach(m=>{t++;if(m.checked)c++;}));if(t===0)return'info';if(c===t)return'ok';if(c>=t*0.8)return'warn';return'alert';}
+function medLabel(meds){let t=0,c=0;Object.values(meds).forEach(arr=>arr.forEach(m=>{t++;if(m.checked)c++;}));if(t===0)return'Sin datos';if(c===t)return'Completa';return c+'/'+t+' tomadas';}
+function avgPct(meals){const vs=meals.map(m=>parseInt(m.pct)||0).filter(n=>n>0);return vs.length?Math.round(vs.reduce((a,b)=>a+b,0)/vs.length):null;}
+function svStatus(tmp1,tmp2,fc1,fc2,sat1,sat2){const s=[stsTemp(tmp1),stsTemp(tmp2),stsFc(fc1),stsFc(fc2),stsSat(sat1),stsSat(sat2)];if(s.includes('alert'))return'alert';if(s.includes('warn'))return'warn';if(s.every(x=>x==='ok'))return'ok';return'info';}
+function liqLabel(l){const n=parseInt(l);if(isNaN(n))return l;if(n>=1600)return l+' — Adecuada';if(n>=1000)return l+' — Deficiente';return l+' — Insuficiente';}
+
+const C={ok:'27AE60',warn:'E67E22',alert:'C0392B',info:'2E75B6'};
+const BG={ok:'E8F8F0',warn:'FEF9E7',alert:'FDEDEC',info:'EBF3FB'};
+const LBL={ok:'Normal',warn:'Atención',alert:'Alerta',info:'Sin datos'};
+
+// ══ PDF ══
+function generarPDF(){
+  const fechaVal=document.getElementById('fecha')?.value;
+  if(!fechaVal){showToast('Ingresa la fecha primero',true);return;}
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210,mg=10,cw=W-mg*2;
+  let y=0;
+
+  function h2r(h){return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+  function fl(c){const[r,g,b]=h2r(c);doc.setFillColor(r,g,b);}
+  function tc(c){const[r,g,b]=h2r(c);doc.setTextColor(r,g,b);}
+  function dc(c){const[r,g,b]=h2r(c);doc.setDrawColor(r,g,b);}
+  function checkY(n){if(y+n>282){doc.addPage();y=12;stripHdr();}}
+
+  function stripHdr(){
+    fl('1F4E79');doc.rect(0,0,W,8,'F');
+    tc('FFFFFF');doc.setFontSize(7);doc.setFont('helvetica','bold');
+    doc.text('Turno Dia - Sra. Ursula - '+fecha+' | '+t1+(t2!=='--'?' & '+t2:''),W/2,5.5,{align:'center'});
+    y=12;
+  }
+  function secHdr(n,title){
+    checkY(10);fl('1F4E79');doc.roundedRect(mg,y,cw,7,1.5,1.5,'F');
+    tc('FFFFFF');doc.setFontSize(8.5);doc.setFont('helvetica','bold');
+    doc.text(n+'. '+title,mg+3,y+5);y+=10;tc('1a1a1a');
+  }
+  function subLbl(t){
+    checkY(8);tc('2E75B6');doc.setFontSize(7);doc.setFont('helvetica','bold');
+    doc.text(t.toUpperCase(),mg,y+4);
+    dc('2E75B6');doc.setLineWidth(0.3);doc.line(mg+doc.getTextWidth(t.toUpperCase())+2,y+2,mg+cw,y+2);
+    y+=7;tc('1a1a1a');doc.setLineWidth(0.2);
+  }
+  function pair(l1,v1,l2,v2){
+    const hw=(cw-3)/2;checkY(12);
+    fl('EBF3FB');doc.rect(mg,y,hw,10,'F');
+    tc('1F4E79');doc.setFontSize(6);doc.setFont('helvetica','bold');doc.text(l1,mg+2,y+3.5);
+    tc('1a1a1a');doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text(String(v1||'--'),mg+2,y+8.5,{maxWidth:hw-4});
+    fl('EBF3FB');doc.rect(mg+hw+3,y,hw,10,'F');
+    tc('1F4E79');doc.setFontSize(6);doc.setFont('helvetica','bold');doc.text(l2,mg+hw+5,y+3.5);
+    tc('1a1a1a');doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text(String(v2||'--'),mg+hw+5,y+8.5,{maxWidth:hw-4});
+    y+=13;
+  }
+  function full(label,val,tall){
+    val=val||'--';const lines=doc.splitTextToSize(String(val),cw-4);
+    const h=tall?Math.max(12,lines.length*4.5+7):12;checkY(h+2);
+    fl('EBF3FB');doc.rect(mg,y,cw,h,'F');
+    if(label){tc('1F4E79');doc.setFontSize(6);doc.setFont('helvetica','bold');doc.text(label,mg+2,y+3.5);}
+    tc('1a1a1a');doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text(lines,mg+2,label?y+8.5:y+5);
+    y+=h+3;
+  }
+  function sumCard(x,yy,w,h,icon,label,val,subval,st){
+    const cc=C[st]||C.info,bg=BG[st]||BG.info;
+    fl(bg);dc(cc);const[r2,g2,b2]=h2r(cc);doc.setDrawColor(r2,g2,b2);doc.setLineWidth(0.8);
+    doc.roundedRect(x,yy,w,h,2,2,'FD');doc.setLineWidth(0.2);
+    fl(cc);doc.circle(x+w/2,yy+9,5,'F');
+    tc('FFFFFF');doc.setFontSize(9);doc.setFont('helvetica','bold');doc.text(icon,x+w/2,yy+11.5,{align:'center'});
+    tc(cc);doc.setFontSize(6.5);doc.setFont('helvetica','bold');doc.text(label,x+w/2,yy+18,{align:'center'});
+    tc('1a1a1a');doc.setFontSize(8.5);doc.setFont('helvetica','bold');doc.text(String(val),x+w/2,yy+24,{align:'center',maxWidth:w-4});
+    if(subval){tc('666666');doc.setFontSize(6.5);doc.setFont('helvetica','normal');doc.text(String(subval),x+w/2,yy+29,{align:'center',maxWidth:w-4});}
+    fl(cc);doc.circle(x+w-5,yy+5,2.5,'F');
+  }
+  function tlEntry(time,icon,label,sub,color){
+    if(y>272)return;
+    const cc=color||'1F4E79';
+    fl(cc);doc.circle(mg+4,y+4,3.5,'F');
+    tc('FFFFFF');doc.setFontSize(7);doc.setFont('helvetica','bold');doc.text(icon.substring(0,1),mg+4,y+5.8,{align:'center'});
+    dc('DDDDDD');doc.setLineWidth(0.4);doc.line(mg+4,y+7.5,mg+4,y+13);doc.setLineWidth(0.2);
+    tc('1F4E79');doc.setFontSize(7.5);doc.setFont('helvetica','bold');if(time)doc.text(time,mg+10,y+5);
+    tc('1a1a1a');doc.setFontSize(8.5);doc.setFont('helvetica','bold');doc.text(label,mg+32,y+5,{maxWidth:cw-33});
+    if(sub){tc('777777');doc.setFontSize(7);doc.setFont('helvetica','normal');doc.text(sub,mg+32,y+9.5,{maxWidth:cw-33});}
+    y+=sub?13:10;
+  }
+
+  // data
+  const fecha=fDate(fechaVal);
+  const t1=getTec(1),t2=getTec(2);
+  const tmp1=getCarouselVal('cw-temp1'),tmp2=getCarouselVal('cw-temp2');
+  const fc1=String(getCarouselVal('cw-fc1')),fc2=String(getCarouselVal('cw-fc2'));
+  const pa1s=String(getCarouselVal('cw-pa1s')),pa1d=String(getCarouselVal('cw-pa1d'));
+  const pa2s=String(getCarouselVal('cw-pa2s')),pa2d=String(getCarouselVal('cw-pa2d'));
+  const pa1=pa1s+'/'+pa1d,pa2=pa2s+'/'+pa2d;
+  const sat1=String(getCarouselVal('cw-sat1')),sat2=String(getCarouselVal('cw-sat2'));
+  const estado=getChipVal('cs-estado'),animo=getChipVal('cs-animo');
+  const liq=getChipVal('cs-liq'),chips=getMultiChips('.mchip');
+  const bano=getChipVal('cs-bano'),depo=getChipVal('cs-depo');
+  const meals=getMeals(),paseos=getPaseos(),visitas=getVisitas();
+  const medGrupos=getMeds();
+  const avg=avgPct(meals);
+  const obsGen=document.getElementById('obs_generales')?.value?.trim()||'--';
+
+  // ── PAGE 1: PORTADA + RESUMEN ──
+  fl('27AE60');doc.rect(0,0,W,6,'F');
+  tc('FFFFFF');doc.setFontSize(7);doc.setFont('helvetica','bold');doc.text('TURNO DIA',mg,4.5);
+  y=10;
+
+  tc('1F4E79');doc.setFontSize(20);doc.setFont('helvetica','bold');doc.text('Sra. Ursula',mg,y+8);y+=10;
+  tc('555555');doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text('Reporte de Enfermeria',mg,y+5);y+=8;
+
+  fl('F0F4F8');doc.roundedRect(mg,y,65,20,2,2,'F');
+  tc('2E75B6');doc.setFontSize(6.5);doc.setFont('helvetica','bold');doc.text('FECHA',mg+3,y+5);
+  tc('1a1a1a');doc.setFontSize(10);doc.setFont('helvetica','bold');doc.text(fecha,mg+3,y+12);
+  tc('555555');doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.text('08:00 - 19:00',mg+3,y+18);
+
+  fl('F0F4F8');doc.roundedRect(mg+68,y,65,20,2,2,'F');
+  tc('2E75B6');doc.setFontSize(6.5);doc.setFont('helvetica','bold');doc.text('TECNICAS',mg+71,y+5);
+  tc('1a1a1a');doc.setFontSize(8.5);doc.setFont('helvetica','bold');doc.text(t1,mg+71,y+12);
+  if(t2&&t2!=='--')doc.text(t2,mg+71,y+18);
+  y+=26;
+
+  tc('1a1a1a');doc.setFontSize(11);doc.setFont('helvetica','bold');doc.text('RESUMEN DEL TURNO',mg,y);y+=4;
+  tc('888888');doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.text('Lo mas importante del dia en un vistazo',mg,y);y+=6;
+
+  const cw5=(cw-16)/5;
+  const svSt=svStatus(tmp1,tmp2,fc1,fc2,sat1,sat2);
+  const medSt=stsMed(medGrupos);
+  const mealSt=avg!==null?stsMeal(avg):'info';
+  const liqSt=stsLiq(parseInt(liq));
+  const animoSt=stsAnimo(animo);
+
+  sumCard(mg,y,cw5,34,'V','SIGNOS VITALES',svSt==='ok'?'Estables':svSt==='warn'?'Atencion':'Alterados','Sat: '+sat1+'%',svSt);
+  sumCard(mg+cw5+4,y,cw5,34,'M','MEDICACION',medLabel(medGrupos),'',medSt);
+  sumCard(mg+(cw5+4)*2,y,cw5,34,'A','ALIMENTACION',avg!==null?avg+'%':'Sin datos',avg!==null?(avg>=65?'Buen apetito':avg>=40?'Regular':'Poco apetito'):'',mealSt);
+  sumCard(mg+(cw5+4)*3,y,cw5,34,'H','HIDRATACION',liq,parseInt(liq)>=1600?'Adecuada':parseInt(liq)>=1000?'Deficiente':'Insuficiente',liqSt);
+  sumCard(mg+(cw5+4)*4,y,cw5,34,'E','ESTADO',animo!=='--'?animo.split('(')[0].trim().split(' ').slice(0,2).join(' '):'--','',animoSt);
+  y+=38;
+
+  if(obsGen&&obsGen!=='--'){
+    fl('F0FFF4');dc('27AE60');const[rg2,gg2,bg3]=h2r('27AE60');doc.setDrawColor(rg2,gg2,bg3);doc.setLineWidth(0.5);
+    const obsLines=doc.splitTextToSize(obsGen,cw-8);
+    const obsH=Math.max(16,obsLines.length*4.5+10);
+    doc.roundedRect(mg,y,cw,obsH,2,2,'FD');doc.setLineWidth(0.2);
+    tc('27AE60');doc.setFontSize(7);doc.setFont('helvetica','bold');doc.text('OBSERVACION GENERAL',mg+3,y+5);
+    tc('1a1a1a');doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text(obsLines,mg+3,y+10);
+    y+=obsH+6;
+  }
+
+  // timeline + sv table
+  const tlW=cw*0.52,svW=cw*0.44,svX=mg+tlW+cw*0.04;
+  tc('1a1a1a');doc.setFontSize(9.5);doc.setFont('helvetica','bold');
+  doc.text('LINEA DE TIEMPO',mg,y);doc.text('SIGNOS VITALES',svX,y);y+=5;
+  dc('DDDDDD');doc.setLineWidth(0.4);doc.line(mg,y,mg+tlW-2,y);doc.line(svX,y,svX+svW,y);doc.setLineWidth(0.2);y+=5;
+
+  const startY2=y;let tlY=startY2,svY=startY2;
+
+  const events=[];
+  events.push(['08:00','V','Inicio de turno','Signos vitales iniciales registrados','1F4E79']);
+  if(vOpt('bano_hora'))events.push([v('bano_hora'),'B','Baño',getChipVal('cs-bano-tipo')+' / '+getChipVal('cs-bano-colab'),'3498DB']);
+  meals.forEach(m=>{if(m.hora&&m.alimentos!=='--')events.push([m.hora,'C',m.comida,m.alimentos+' / '+m.pct,'E67E22']);});
+  paseos.forEach(p=>{if(p.desde)events.push([p.desde,'P',p.tipo||'Paseo',(p.hasta?'hasta '+p.hasta:''),'27AE60']);});
+  if(depo==='Si'&&vOpt('depo_hora'))events.push([v('depo_hora'),'D','Deposicion',getChipVal('cs-depo-veces'),'C0392B']);
+  visitas.forEach(vi=>{if(vi.hora)events.push([vi.hora,'Vi','Visita',vi.nombre+' ('+vi.dur+')','8E44AD']);});
+  events.push(['19:00','V','Fin de turno','Signos vitales finales registrados','1F4E79']);
+  events.sort((a,b)=>{if(a[0]==='08:00')return-1;if(b[0]==='08:00')return 1;if(a[0]==='19:00')return 1;if(b[0]==='19:00')return-1;return(a[0]||'').localeCompare(b[0]||'');});
+
+  const savedY=y;
+  events.forEach(([time,icon,label,sub,color])=>{
+    if(tlY>272)return;
+    const cc=color||'1F4E79';
+    fl(cc);doc.circle(mg+4,tlY+4,3.2,'F');
+    tc('FFFFFF');doc.setFontSize(6.5);doc.setFont('helvetica','bold');doc.text(icon.substring(0,1),mg+4,tlY+5.8,{align:'center'});
+    dc('DDDDDD');doc.setLineWidth(0.3);doc.line(mg+4,tlY+7.5,mg+4,tlY+13);doc.setLineWidth(0.2);
+    tc('1F4E79');doc.setFontSize(7);doc.setFont('helvetica','bold');if(time)doc.text(time,mg+9,tlY+5);
+    tc('1a1a1a');doc.setFontSize(7.5);doc.setFont('helvetica','bold');doc.text(label,mg+28,tlY+5,{maxWidth:tlW-30});
+    tc('777777');doc.setFontSize(6.5);doc.setFont('helvetica','normal');if(sub)doc.text(sub,mg+28,tlY+9.5,{maxWidth:tlW-30});
+    tlY+=sub?13:10;
+  });
+
+  // SV table
+  fl('1F4E79');doc.rect(svX,svY,svW,6,'F');
+  tc('FFFFFF');doc.setFontSize(5.5);doc.setFont('helvetica','bold');
+  const sc=svW/4;
+  doc.text('MEDICION',svX+1,svY+4);doc.text('INICIO',svX+sc+1,svY+4);doc.text('FIN',svX+sc*2+1,svY+4);doc.text('ESTADO',svX+sc*3+1,svY+4);
+  svY+=7;
+  [[' Temperatura',tmp1+' C',tmp2+' C',stsTemp(tmp1)],['Frec. cardiaca',fc1+' lpm',fc2+' lpm',stsFc(fc1)],['Pres. arterial',pa1,pa2,'info'],['Saturacion O2',sat1+'%',sat2+'%',stsSat(sat1)]].forEach((r,i)=>{
+    fl(i%2===0?'F8FBFF':'FFFFFF');doc.rect(svX,svY,svW,7,'F');
+    dc('E8E8E8');doc.setLineWidth(0.2);doc.rect(svX,svY,svW,7);
+    tc('444444');doc.setFontSize(6.5);doc.setFont('helvetica','bold');doc.text(r[0],svX+1,svY+4.8);
+    tc('1a1a1a');doc.setFontSize(7);doc.setFont('helvetica','normal');
+    doc.text(r[1],svX+sc+1,svY+4.8);doc.text(r[2],svX+sc*2+1,svY+4.8);
+    const st=r[3];
+    if(st&&st!=='info'){fl(C[st]);doc.roundedRect(svX+sc*3+1,svY+1.5,sc-4,4,1,1,'F');tc('FFFFFF');doc.setFontSize(5.5);doc.setFont('helvetica','bold');doc.text(LBL[st],svX+sc*3+1+(sc-4)/2,svY+4.3,{align:'center'});}
+    svY+=8;
+  });
+  svY+=3;
+  fl('EBF3FB');doc.rect(svX,svY,svW,8,'F');
+  tc('1F4E79');doc.setFontSize(6);doc.setFont('helvetica','bold');doc.text('Estado general',svX+1,svY+3.5);
+  tc('1a1a1a');doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.text(estado,svX+1,svY+7.5,{maxWidth:svW-2});
+  svY+=11;
+
+  y=Math.max(tlY,svY)+6;
+
+  // MED + NUTRICION lado a lado
+  const mW=cw*0.48,nW=cw*0.48,nX=mg+mW+cw*0.04;
+  if(y>215){doc.addPage();y=12;stripHdr();}
+
+  tc('1a1a1a');doc.setFontSize(9.5);doc.setFont('helvetica','bold');
+  doc.text('MEDICACION',mg,y);doc.text('NUTRICION E HIDRATACION',nX,y);y+=5;
+  dc('DDDDDD');doc.setLineWidth(0.4);doc.line(mg,y,mg+mW,y);doc.line(nX,y,nX+nW,y);doc.setLineWidth(0.2);y+=4;
+
+  let mY=y,nY=y;
+  const gcols={'Antes desayuno':'E8956D','Desayuno':'E07070','Almuerzo':'7A9FCC','Después de terapia':'C4A84F','Cena':'5F9E6E','Condicional':'9B78C2','Adicional':'888888'};
+
+  Object.entries(medGrupos).forEach(([mom,meds])=>{
+    if(!meds.length)return;if(mY>268)return;
+    const[r,g,b]=h2r(gcols[mom]||'555555');doc.setFillColor(r,g,b);
+    doc.roundedRect(mg,mY,mW,5,1,1,'F');
+    tc('FFFFFF');doc.setFontSize(6.5);doc.setFont('helvetica','bold');doc.text(mom.toUpperCase(),mg+2,mY+3.5);mY+=6;
+    meds.forEach(med=>{
+      if(mY>268)return;
+      fl(med.checked?'E8F8F0':'FFF0F0');doc.rect(mg,mY,mW,6,'F');
+      if(med.checked){fl('27AE60');doc.circle(mg+3.5,mY+3,3,'F');tc('FFFFFF');doc.setFontSize(9);doc.setFont('helvetica','bold');doc.text('v',mg+1.5,mY+4.8);}
+      else{fl('FDEDEC');dc('C0392B');const[rx,gx,bx]=h2r('C0392B');doc.setDrawColor(rx,gx,bx);doc.setLineWidth(0.5);doc.circle(mg+3.5,mY+3,3,'FD');doc.setLineWidth(0.2);tc('C0392B');doc.setFontSize(9);doc.setFont('helvetica','bold');doc.text('x',mg+1.5,mY+4.8);}
+      tc(med.checked?'155724':'7B241C');doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.text(med.nombre,mg+8,mY+4,{maxWidth:mW-30});
+      tc('888888');doc.setFontSize(6.5);doc.setFont('helvetica','normal');if(med.dosis)doc.text(med.dosis,mg+mW-doc.getTextWidth(med.dosis)-1,mY+4);
+      mY+=7;
+    });mY+=1;
+  });
+
+  // NUTRICION side
+  const mbg2=['FFF3E0','EBF3FB','E8F5E9','F3E5F5'];
+  fl('1F4E79');doc.rect(nX,nY,nW,6,'F');
+  tc('FFFFFF');doc.setFontSize(6);doc.setFont('helvetica','bold');
+  const nc2=[nW*0.22,nW*0.16,nW*0.38,nW*0.24];let nx2=nX;
+  ['Comida','Hora','Alimentos','% Cons.'].forEach((h,i)=>{doc.text(h,nx2+1,nY+4.3);nx2+=nc2[i];});nY+=7;
+  meals.forEach((m,i)=>{
+    if(nY>268)return;
+    const[r,g,b]=h2r(mbg2[i]);doc.setFillColor(r,g,b);doc.rect(nX,nY,nW,7,'F');
+    fl('D6E4F0');doc.rect(nX,nY,nc2[0],7,'F');
+    tc('1F4E79');doc.setFontSize(6.5);doc.setFont('helvetica','bold');doc.text(m.comida,nX+1,nY+4.8);
+    nx2=nX+nc2[0];tc('1a1a1a');doc.setFontSize(7);doc.setFont('helvetica','normal');
+    doc.text(m.hora||'--',nx2+1,nY+4.8);nx2+=nc2[1];
+    doc.text(m.alimentos,nx2+1,nY+4.8,{maxWidth:nc2[2]-2});nx2+=nc2[2];
+    doc.text(m.pct,nx2+1,nY+4.8);nY+=8;
+  });nY+=3;
+  fl('EBF3FB');doc.rect(nX,nY,nW/2-1,12,'F');
+  tc('2E75B6');doc.setFontSize(6);doc.setFont('helvetica','bold');doc.text('LIQUIDOS TOTALES',nX+2,nY+4);
+  tc('1a1a1a');doc.setFontSize(10);doc.setFont('helvetica','bold');doc.text(liq,nX+2,nY+10);
+  fl('EBF3FB');doc.rect(nX+nW/2+1,nY,nW/2-1,12,'F');
+  tc('2E75B6');doc.setFontSize(6);doc.setFont('helvetica','bold');doc.text('TIPOS DE LIQUIDO',nX+nW/2+3,nY+4);
+  tc('1a1a1a');doc.setFontSize(7);doc.setFont('helvetica','normal');doc.text(chips,nX+nW/2+3,nY+9,{maxWidth:nW/2-4});
+  nY+=15;
+
+  y=Math.max(mY,nY)+6;
+
+  // PAGINA DETALLE
+  doc.addPage();y=12;stripHdr();
+
+  secHdr('1','DATOS DEL TURNO');
+  pair('Fecha',fecha,'Tecnicas',t1+(t2!=='--'?' & '+t2:''));
+
+  secHdr('2','SIGNOS VITALES');
+  subLbl('Al inicio del turno - 08:00');
+  pair('Temperatura',tmp1+' C','Frec. cardiaca',fc1+' lpm');
+  pair('Presion arterial',pa1+' mmHg','Saturacion O2',sat1+'%');
+  full('Estado general',estado);
+  subLbl('Al final del turno - 19:00');
+  pair('Temperatura',tmp2+' C','Frec. cardiaca',fc2+' lpm');
+  pair('Presion arterial',pa2+' mmHg','Saturacion O2',sat2+'%');
+
+  secHdr('3','MEDICACION ADMINISTRADA');
+  Object.entries(medGrupos).forEach(([mom,meds])=>{
+    if(!meds.length)return;checkY(10+meds.length*7);
+    const[r,g,b]=h2r(gcols[mom]||'555555');doc.setFillColor(r,g,b);
+    doc.roundedRect(mg,y,cw,5,1,1,'F');
+    tc('FFFFFF');doc.setFontSize(7);doc.setFont('helvetica','bold');doc.text(mom.toUpperCase(),mg+3,y+3.5);y+=6;
+    meds.forEach(med=>{
+      checkY(7);fl(med.checked?'E8F8F0':'FFF0F0');doc.rect(mg,y,cw,7,'F');
+      if(med.checked){fl('27AE60');doc.circle(mg+3.5,y+3.5,3,'F');tc('FFFFFF');doc.setFontSize(9);doc.setFont('helvetica','bold');doc.text('v',mg+1.5,y+5);}
+      else{fl('FDEDEC');dc('C0392B');const[rx,gx,bx]=h2r('C0392B');doc.setDrawColor(rx,gx,bx);doc.setLineWidth(0.5);doc.circle(mg+3.5,y+3.5,3,'FD');doc.setLineWidth(0.2);tc('C0392B');doc.setFontSize(9);doc.setFont('helvetica','bold');doc.text('x',mg+1.5,y+5);}
+      tc(med.checked?'155724':'7B241C');doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text(med.nombre,mg+9,y+4.8);
+      tc('777777');doc.setFontSize(7.5);doc.setFont('helvetica','normal');if(med.dosis)doc.text(med.dosis,mg+cw-doc.getTextWidth(med.dosis)-2,y+4.8);
+      y+=7;doc.setLineWidth(0.2);
+    });y+=2;
+  });
+
+  secHdr('4','NUTRICION E HIDRATACION');
+  checkY(10+meals.length*9);
+  fl('1F4E79');doc.rect(mg,y,cw,6,'F');
+  tc('FFFFFF');doc.setFontSize(6.5);doc.setFont('helvetica','bold');
+  const mc3=[cw*0.2,cw*0.13,cw*0.45,cw*0.22];let cx3=mg;
+  ['Comida','Hora','Alimentos','% Cons.'].forEach((h,i)=>{doc.text(h,cx3+1,y+4.3);cx3+=mc3[i];});y+=7;
+  meals.forEach((m,i)=>{
+    checkY(9);const[r,g,b]=h2r(mbg2[i]);doc.setFillColor(r,g,b);doc.rect(mg,y,cw,8,'F');
+    fl('D6E4F0');doc.rect(mg,y,mc3[0],8,'F');
+    tc('1F4E79');doc.setFontSize(6.5);doc.setFont('helvetica','bold');doc.text(m.comida,mg+1,y+5.3);
+    cx3=mg+mc3[0];tc('1a1a1a');doc.setFontSize(8);doc.setFont('helvetica','normal');
+    doc.text(m.hora||'--',cx3+1,y+5.3);cx3+=mc3[1];
+    doc.text(m.alimentos,cx3+1,y+5.3,{maxWidth:mc3[2]-2});cx3+=mc3[2];
+    doc.text(m.pct,cx3+1,y+5.3);y+=9;
+  });y+=2;
+  pair('Liquidos totales',liqLabel(liq),'Tipos de liquido',chips);
+
+  secHdr('5','HIGIENE Y CUIDADO FISICO');
+  pair('Baño realizado',bano,'Tipo',getChipVal('cs-bano-tipo'));
+  pair('Hora del baño',v('bano_hora'),'Colaboracion',getChipVal('cs-bano-colab'));
+  pair('Higiene bucal',getChipVal('cs-bucal'),'Hora',v('bucal_hora'));
+  subLbl('Deposicion');
+  pair('Realizo deposicion',depo,'Veces',getChipVal('cs-depo-veces'));
+  if(depo==='Si')pair('Hora',v('depo_hora'),' ',' ');
+  subLbl('Micciones');
+  pair('Cambios de panal',getChipVal('cs-mictions'),'Presencia de orina',getChipVal('cs-orina'));
+  pair('Ultimo cambio',v('ultimo_cambio'),' ',' ');
+
+  secHdr('6','ACTIVIDAD FISICA');
+  if(paseos.length){paseos.forEach(p=>{checkY(8);fl('EBF3FB');doc.rect(mg,y,cw,7,'F');tc('1a1a1a');doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text((p.tipo||'Paseo')+': '+(p.desde||'?')+' - '+(p.hasta||'?'),mg+3,y+4.8);y+=8;});y+=2;}
+  else full('Paseos','Sin paseos registrados');
+
+  if(visitas.length){
+    secHdr('7','VISITAS');
+    fl('1F4E79');doc.rect(mg,y,cw,6,'F');tc('FFFFFF');doc.setFontSize(6.5);doc.setFont('helvetica','bold');
+    doc.text('Hora',mg+2,y+4.3);doc.text('Visitante',mg+22,y+4.3);doc.text('Duracion',mg+100,y+4.3);y+=7;
+    visitas.forEach((vi,i)=>{checkY(8);fl(i%2===0?'F5F8FC':'FFFFFF');doc.rect(mg,y,cw,7,'F');tc('1a1a1a');doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text(vi.hora,mg+2,y+4.8);doc.text(vi.nombre,mg+22,y+4.8,{maxWidth:76});doc.text(vi.dur,mg+100,y+4.8,{maxWidth:cw-90});y+=8;});y+=2;
+  }
+
+  secHdr('8','ESTADO DE ANIMO GENERAL');
+  full('Estado de animo',animo);
+
+  secHdr('9','OBSERVACIONES GENERALES');
+  full('',obsGen,true);
+
+  // footer
+  const pc=doc.getNumberOfPages();
+  for(let i=1;i<=pc;i++){
+    doc.setPage(i);fl('1F4E79');doc.rect(0,288,W,9,'F');
+    tc('FFFFFF');doc.setFontSize(6.5);doc.setFont('helvetica','normal');
+    doc.text('Sra. Ursula | Turno Dia '+fecha+' | '+t1+(t2!=='--'?' & '+t2:''),mg,293);
+    doc.text('Pag '+i+' / '+pc,W-mg,293,{align:'right'});
+  }
+  doc.save('TurnoDia_'+fDateFile(fechaVal)+'.pdf');
+  showToast('Reporte guardado correctamente');
+}
+</script>
+</body>
+</html>
